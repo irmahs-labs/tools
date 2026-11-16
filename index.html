@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tools by Irma HS</title>
+    <meta
+      name="description"
+      content="Little tools by Irma HS, free in your browser. Make an album cover: drop in a photo, add your title, export a 3000 × 3000 PNG."
+    />
+    <meta
+      name="theme-color"
+      content="#f3f1c8"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#1c2420"
+      media="(prefers-color-scheme: dark)"
+    />
+    <!-- Light or Dark Matcha before the first paint: the saved choice, or
+         else the device's setting. src/lib/theme.ts takes over from here. -->
+    <script>
+      try {
+        var saved = localStorage.getItem("theme");
+        document.documentElement.dataset.theme =
+          saved === "light" || saved === "dark"
+            ? saved
+            : matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+      } catch (e) {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script>
+    <!-- The language, English or French, shared by every irmahs.dev app:
+         src/lib/language.ts keeps it. -->
+    <script>
+      try {
+        var lang =
+          (document.cookie.match(/(?:^|; )lang=(en|fr)(?:;|$)/) || [])[1] ||
+          localStorage.getItem("lang");
+        if (lang === "en" || lang === "fr")
+          document.documentElement.lang = lang;
+      } catch (e) {}
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

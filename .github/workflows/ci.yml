@@ -16,17 +16,40 @@ concurrency:
 
 jobs:
   # Lint and format, Type-check, Tests, Build and Docker build, shared by every
-  # irmahs-labs repo (irmahs-labs/workflows). Pass only what differs here, and add
-  # the app's own jobs (a database, a smoke test, browser tests) next to it.
+  # irmahs-labs repo (irmahs-labs/workflows), with its defaults.
   app:
     uses: irmahs-labs/workflows/.github/workflows/app-ci.yml@main
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+      # Builds the app and serves it itself (playwright.config.ts)
+      - run: npm run test:e2e
+      - name: Upload the Playwright report when they fail
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
 
   # The branch rules require a check named "checks". It fails if any job
   # above failed, was cancelled or skipped; list new jobs in needs.
   checks:
     name: checks
     if: always()
-    needs: [app]
+    needs: [app, e2e]
     runs-on: ubuntu-24.04
     steps:
       - name: A job did not pass
