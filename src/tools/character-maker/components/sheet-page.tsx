@@ -1,0 +1,45 @@
+import { useCopy } from "../../../lib/language";
+import { linkTo } from "../../../router";
+import { useCharacters } from "../lib/storage";
+import { CHARACTER_HOME, characterPath } from "../paths";
+import { COPY } from "./copy";
+import { CharacterSheet } from "./sheet";
+import { Topbar } from "./topbar";
+
+/** A character's sheet on its own, ready to print: the print styles keep only the sheet. */
+export const SheetPage = ({ id }: { id: string }) => {
+  const t = useCopy(COPY);
+  const character = useCharacters().find((entry) => entry.id === id);
+
+  return (
+    <div className="page dotted">
+      <Topbar>
+        <a
+          href={character ? characterPath(character.id) : CHARACTER_HOME}
+          onClick={linkTo(
+            character ? characterPath(character.id) : CHARACTER_HOME
+          )}
+          className="pill"
+        >
+          {character ? t.edit : t.back}
+        </a>
+        {character ? (
+          <button
+            type="button"
+            className="pill primary"
+            onClick={() => window.print()}
+          >
+            {t.print}
+          </button>
+        ) : null}
+      </Topbar>
+      <main className="sheet-page">
+        {character ? (
+          <CharacterSheet character={character} />
+        ) : (
+          <p className="lead">{t.empty}</p>
+        )}
+      </main>
+    </div>
+  );
+};

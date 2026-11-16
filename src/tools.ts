@@ -3,6 +3,8 @@ import type { ComponentType } from "react";
 import type { Language } from "./lib/language";
 import { Logo as AlbumCoverLogo } from "./tools/album-cover-maker/components/logo";
 import { ALBUM_HOME } from "./tools/album-cover-maker/paths";
+import { Logo as CharacterLogo } from "./tools/character-maker/components/logo";
+import { CHARACTER_HOME } from "./tools/character-maker/paths";
 
 /**
  * Every tool on the site. Adding one is an entry here and a folder under
@@ -20,6 +22,17 @@ export interface Tool {
 }
 
 export const TOOLS: readonly Tool[] = [
+  {
+    Logo: CharacterLogo,
+    blurb: {
+      en: "Make a level 1 fifth edition character step by step, with every number worked out, and print its sheet.",
+      fr: "Créez pas à pas un personnage de niveau 1 pour la cinquième édition, chaque nombre calculé, et imprimez sa fiche.",
+    },
+    href: CHARACTER_HOME,
+    legend: "character-maker.exe",
+    name: { en: "Character Maker", fr: "Character Maker" },
+    slug: "character-maker",
+  },
   {
     Logo: AlbumCoverLogo,
     blurb: {
