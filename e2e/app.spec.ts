@@ -350,7 +350,12 @@ test("contacts no other site but the account service, photo and fonts included",
   expect([...elsewhere]).toEqual([]);
 });
 
-for (const path of ["/", "/album-cover-maker", "/album-cover-maker/make"]) {
+for (const path of [
+  "/",
+  "/album-cover-maker",
+  "/album-cover-maker/make",
+  "/character-maker",
+]) {
   test(`${path} fits a phone screen without sideways scrolling`, async ({
     page,
   }) => {
@@ -364,3 +369,51 @@ for (const path of ["/", "/album-cover-maker", "/album-cover-maker/make"]) {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 }
+
+test("makes a level 1 character and shows its sheet, kept after a reload", async ({
+  page,
+}) => {
+  await page.goto("/character-maker");
+  await page.getByRole("button", { name: "make a character" }).click();
+  await expect(page).toHaveURL(/\/character-maker\/[\w-]+$/u);
+
+  // The barbarian: no spells, and its gear is fixed
+  await page.getByRole("button", { name: /^Barbarian/u }).click();
+  await page.locator(".step-tab", { hasText: "Details" }).click();
+  await page.getByLabel("Character name").fill("Grenda");
+
+  const sheet = page.locator(".sheet-window");
+
+  await expect(sheet.getByRole("heading", { name: "Grenda" })).toBeVisible();
+  // d12 + Con −1 at 8 in every score
+  await expect(sheet.locator(".sheet-stat").nth(1)).toContainText("11");
+
+  await page.reload();
+  await page.getByRole("link", { exact: true, name: "see the sheet" }).click();
+  await expect(page.getByRole("heading", { name: "Grenda" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "print or save as PDF" })
+  ).toBeVisible();
+  await expect(
+    page.getByText("System Reference Document 5.2.1").first()
+  ).toBeVisible();
+});
+
+test("the character pages fit a phone screen without sideways scrolling", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto("/character-maker");
+  await page.getByRole("button", { name: "make a character" }).click();
+  await page.getByRole("button", { name: /^Wizard/u }).click();
+
+  const overflow = () =>
+    page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth
+    );
+
+  expect(await overflow()).toBeLessThanOrEqual(0);
+
+  await page.getByRole("link", { exact: true, name: "see the sheet" }).click();
+  expect(await overflow()).toBeLessThanOrEqual(0);
+});

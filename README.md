@@ -2,13 +2,14 @@
 
 Little tools for making things, at https://tools.irmahs.dev. The hub at `/` lists them; each tool lives at `/<slug>`.
 
+- **Character Maker** (`/character-maker`, each character at `/character-maker/<id>` and its sheet at `/character-maker/<id>/sheet`): a level 1 character for fifth edition, step by step (class, origin, scores, skills, spells, gear, details), with every number on the sheet worked out, and a one-page sheet to print or save as PDF. Characters are kept in this browser only. It uses the System Reference Document 5.2.1 only (in English, and in its official French translation), under CC-BY-4.0, with the attribution the SRD asks for on every page; it is "5E compatible" and never names the game it's compatible with.
 - **Album Cover Maker** (`/album-cover-maker`, the maker at `/album-cover-maker/make`): drop in a photo, add a title, pick a font and colour combo, and export a 3000 × 3000 cover PNG plus a 1080 × 1440 music player mock-up. No sign-up or login, and photos never leave the browser. It used to be its own app at album-cover-maker.irmahs.dev (irmahs-labs/album-cover-maker, where its history is); that address now redirects here. Design: the "Cover maker: edit screen" artboard of the Cute Matcha design canvas.
 
 ## Develop
 
 ```sh
 npm install
-npm run dev        # http://localhost:5173  (the hub at /, Album Cover Maker at /album-cover-maker)
+npm run dev        # http://localhost:5173  (the hub at /, Character Maker at /character-maker, Album Cover Maker at /album-cover-maker)
 npm test           # unit, drawing and screen tests (vitest)
 npm run test:e2e   # end-to-end tests in Chromium (Playwright; builds first)
 npm run typecheck  # app and end-to-end tests
@@ -23,6 +24,12 @@ npm run build      # outputs dist/
 - `src/components/`: the hub and what every page shares (header pills, windows)
 - `src/lib/`: language, theme and the sign-in check, shared by every tool
 - `src/tools/<slug>/`: one folder per tool, with its own `components/` and `lib/`
+
+Character Maker, in `src/tools/character-maker/`:
+
+- `lib/srd/`: the SRD 5.2.1's level 1 content as data, each name in the English and French SRD's words: `core.ts` (abilities, skills, languages, alignments), `classes.ts`, `origins.ts` (backgrounds, species, Origin feats), `equipment.ts`, `spells.ts` (every cantrip and level 1 spell, generated from both SRDs' text)
+- `lib/character.ts`: a character's choices and their schema; `lib/rules.ts`: what they add up to on the sheet and what's left to choose; `lib/edits.ts`: changes that clear what no longer applies; `lib/storage.ts`: the browser's copy
+- `components/`: its own page, the editor and its steps, and the sheet (`sheet.tsx`, the live preview and the printable page)
 
 Album Cover Maker, in `src/tools/album-cover-maker/`:
 
