@@ -1,0 +1,1515 @@
+:root {
+  /* Cute Matcha's role tokens, named by job: Light Matcha here, Dark Matcha
+     below. Pick one by what the thing is, never by its hex. */
+  --ground: #f3f1c8;
+  --panel: #f7f8de;
+  --header: #f7f8de;
+  --raised: #fffdf0;
+  --raised-hover: #e8e1bd;
+  --text: #2f3b34;
+  --text-muted: #335a26;
+  --outline: #2f3b34;
+  --accent: #d4dd9c;
+  --accent-soft: #afc584;
+  --on-accent: #2f3b34;
+  /* The one accent: a pastel butter yellow, for the call to action only */
+  --pop: #ffd968;
+  --pop-hover: #f5c94a;
+  --on-pop: #2f3b34;
+  --strong: #3b4a42;
+  --on-strong: #fff3cf;
+  --selected: #afc584;
+  --on-selected: #2f3b34;
+  --grid: #4e6152;
+  --pattern-dot: #afc584;
+  --pattern-line: #f3f1c800;
+  --focus: #4a7fc0;
+  --danger: #f0675c;
+  /* Hard shadows are the same near-black in both themes */
+  --shadow-hard: 3px 3px 0 #0f1411;
+  --shadow-soft: 2px 2px 0 #0f1411;
+  /* Concentric corners: a 20px panel padded 12px holds 8px fields, and what
+     sits deep inside a 9px window is all but square */
+  --radius-xs: 2px;
+  --radius-field: 8px;
+  --radius-lg: 9px;
+  --radius-panel: 20px;
+  --space-group: 24px;
+  color-scheme: light;
+
+  /* Fixed: they belong to drawings and marks, never to text. */
+  --moss: #5c8f48;
+  --gold: #f2d27a;
+  --cream: #fff3cf;
+  --white: #ffffff;
+  --ink: #2f3b34;
+  /* The window buttons: plus in moss, minus in gold */
+  --plus: #5c8f48;
+  --minus: #f2d27a;
+
+  /* Fredoka sets titles and panel names, Nunito Sans everything else;
+     both are served by the app itself (src/font-faces.css) */
+  --font: "Nunito Sans", "Fredoka", system-ui, sans-serif;
+  --display: "Fredoka", "Nunito Sans", system-ui, sans-serif;
+}
+:root[data-theme="dark"] {
+  /* Dark Matcha: a mid-tone matcha page, cards a step lighter, and the header,
+     buttons and fields a darker well. Outlines and shadows stay near-black. */
+  --ground: #405045;
+  --panel: #4b5c51;
+  --header: #2f3d34;
+  --raised: #2f3d34;
+  --raised-hover: #3a4a3f;
+  --text: #f3f1c8;
+  --text-muted: #dbe8a6;
+  --outline: #0f1411;
+  --accent: #c9d68f;
+  --accent-soft: #9eb27a;
+  --on-accent: #0f1411;
+  --pop: #ffe08a;
+  --pop-hover: #ffd666;
+  --on-pop: #0f1411;
+  --strong: #1c2420;
+  --on-strong: #f3f1c8;
+  --selected: #c9d68f;
+  --on-selected: #0f1411;
+  --grid: #2f3b34;
+  --pattern-dot: #b8d97000;
+  --pattern-line: #4a5b4f;
+  --focus: #c2d8f5;
+  --danger: #f6a49d;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--text-muted);
+}
+a:hover {
+  color: var(--text);
+}
+input,
+button,
+select {
+  font-family: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled,
+input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.dotted {
+  background-color: var(--ground);
+  /* Cute Matcha's Ground: dots in Light Matcha, grid lines in Dark Matcha.
+     Each pattern token is transparent in the other theme. */
+  background-image:
+    radial-gradient(var(--pattern-dot) 1.2px, transparent 1.4px),
+    linear-gradient(var(--pattern-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pattern-line) 1px, transparent 1px);
+  background-size:
+    22px 22px,
+    28px 28px,
+    28px 28px;
+}
+
+/* Top bar */
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 14px 28px;
+  background: var(--header);
+  border-bottom: 2px solid var(--outline);
+  color: var(--text);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+.brand-name {
+  display: block;
+  font-size: 24px;
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.1;
+}
+.brand-by {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.topbar-hint {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+/* The maker's header: brand, the two big actions in the middle, then the hint. */
+.maker-topbar > .brand,
+.topbar-end {
+  flex: 1 1 0;
+  min-width: max-content;
+}
+.topbar-actions {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.topbar-actions .pill.primary {
+  box-shadow: 3px 3px 0 #0f1411;
+}
+.history {
+  display: flex;
+  gap: 8px;
+}
+/* The header's small pills (undo, redo, the sun/moon switch) stand as tall
+   as the account pill beside them */
+.topbar-end .pill.small {
+  min-height: 40px;
+  padding: 4px 14px;
+}
+.topbar-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 18px;
+}
+
+/* Cute Matcha's AccountButton, as a 40px header pill: a panel piece lying
+   on the desk, with Google's mark or the person's picture in a white
+   circle. On phones only the circle shows; its text stays for screen
+   readers. */
+.account {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px 0 4px;
+  border: 1.5px solid var(--outline);
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.account:hover {
+  color: var(--text);
+  background: var(--raised-hover);
+}
+.account-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  border: 1.5px solid var(--outline);
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--ink);
+  font-weight: 700;
+}
+.account-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (max-width: 600px) {
+  .account {
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .account-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Buttons */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: flex-start;
+  min-height: 42px;
+  padding: 6px 16px;
+  border: 2px solid var(--outline);
+  border-radius: 999px;
+  background: var(--raised);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.pill:hover {
+  background: var(--panel);
+  color: var(--text);
+}
+/* The one call to action on a screen: the only yellow thing on it, 48px
+   tall, on the hard shadow it sinks into when pressed */
+.pill.primary {
+  min-height: 48px;
+  background: var(--pop);
+  color: var(--on-pop);
+  box-shadow: var(--shadow-hard);
+  transition:
+    background-color 0.15s,
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+.pill.primary:hover {
+  background: var(--pop-hover);
+  color: var(--on-pop);
+}
+.pill.primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #0f1411;
+}
+/* Align by eye: the icon side takes 2px less */
+.pill:has(> svg:first-child) {
+  padding-left: 14px;
+}
+.pill.big {
+  min-height: 48px;
+  padding: 8px 22px;
+  font-size: 16px;
+}
+.pill.wide {
+  align-self: stretch;
+}
+.pill.small {
+  min-height: 32px;
+  padding: 2px 12px;
+  font-size: 13px;
+}
+
+/* The header's language pill: EN and FR, the page's language pressed. It
+   sits beside the small theme pill, at its height. */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  margin: 0;
+  padding: 2px;
+  border: 2px solid var(--outline);
+  border-radius: 999px;
+  background: var(--raised);
+}
+.lang-toggle__option {
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: 800 12px/1 var(--font);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.lang-toggle__option:hover {
+  background: var(--panel);
+}
+.lang-toggle__option[aria-pressed="true"] {
+  border-color: var(--outline);
+  background: var(--selected);
+  color: var(--on-selected);
+}
+
+.toggle {
+  min-height: 44px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-field);
+  background: var(--raised);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.toggle[aria-pressed="true"] {
+  background: var(--selected);
+  color: var(--on-selected);
+}
+
+/* Panels (the editor's fieldsets) */
+.panel {
+  margin: 0;
+  min-width: 0;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-panel);
+  background: var(--panel);
+  padding: 16px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text);
+}
+.panel > legend {
+  background: var(--strong);
+  color: var(--on-strong);
+  border-radius: 999px;
+  padding: 3px 12px 1px;
+  font-size: 12px;
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.panel.grow {
+  flex: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.hint {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.hint.center {
+  text-align: center;
+}
+.muted {
+  color: var(--text-muted);
+}
+.small {
+  font-size: 13px;
+}
+.lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.text {
+  font-size: 15px;
+  padding: 9px 11px;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-field);
+  background: var(--raised);
+  color: var(--text);
+  min-width: 0;
+  font-weight: 400;
+}
+.select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 36px 8px 12px;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-field);
+  background-color: var(--raised);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text) 50%),
+    linear-gradient(135deg, var(--text) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+  appearance: none;
+  color: var(--text);
+}
+
+.font-picker {
+  position: relative;
+}
+.font-button {
+  display: block;
+  text-align: left;
+  font-size: 19px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.font-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-field);
+  background: var(--raised);
+  box-shadow: var(--shadow-hard);
+  outline: none;
+  color: var(--text);
+}
+.font-list [role="option"] {
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 19px;
+  line-height: 1.25;
+  color: var(--text);
+  cursor: pointer;
+}
+.font-list [role="option"].active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.font-list [role="option"][aria-selected="true"] {
+  background: var(--selected);
+  color: var(--on-selected);
+}
+.font-list:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+input[type="range"] {
+  accent-color: var(--strong);
+  width: 100%;
+}
+input.hue {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--outline);
+  margin: 0;
+}
+input.hue::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--outline);
+  box-shadow: 2px 2px 0 #0f1411;
+}
+input.hue::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--outline);
+}
+input.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 50px;
+  height: 28px;
+  border-radius: 999px;
+  border: 2px solid var(--outline);
+  background: var(--raised);
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+  color: var(--text);
+}
+input.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: left 0.15s;
+}
+input.switch:checked {
+  background: var(--selected);
+}
+input.switch:checked::after {
+  left: 24px;
+  background: var(--on-selected);
+}
+
+/* The lock between the two player sliders, on a dashed line. */
+.hue-lock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hue-lock::before,
+.hue-lock::after {
+  content: "";
+  flex: 1;
+  border-top: 1.5px dashed var(--moss);
+}
+.hue-lock .pill {
+  align-self: center;
+  min-height: 36px;
+}
+.hue-lock .pill[aria-pressed="true"] {
+  background: var(--selected);
+  color: var(--on-selected);
+}
+.swatch-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--outline);
+}
+
+/* Maker layout */
+.maker {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  flex: 1;
+}
+.preview-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: stretch;
+}
+/* The three previews are windows; their bodies stretch to the row's height */
+.preview-row .window {
+  display: flex;
+  flex-direction: column;
+}
+.preview-row .window-body {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.preview-row .hint {
+  color: var(--on-accent);
+}
+.cover-window {
+  flex: 400 1 0;
+  min-width: 300px;
+}
+/* A photo held over the lime window darkens it a step */
+.cover-window.drag-over .window-body {
+  background: var(--accent-soft);
+}
+.player-window {
+  flex: 0 0 290px;
+}
+.cover-stage {
+  flex: 1;
+  padding-top: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cover-frame {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1;
+  border: 2px solid var(--outline);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--outline);
+}
+.cover-frame canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.cover-frame canvas.draggable {
+  cursor: grab;
+}
+.cover-frame canvas.draggable:active {
+  cursor: grabbing;
+}
+.cover-frame canvas.text-draggable {
+  cursor: move;
+}
+/* The nine text spots, shown while the title is being dragged. */
+.spot-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  pointer-events: none;
+}
+.spot-grid span {
+  border: 1.5px dashed rgb(255 243 207 / 0.7);
+  margin: -0.75px;
+}
+.spot-grid span.active {
+  background: rgb(221 232 126 / 0.28);
+  border-style: solid;
+}
+.drop-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  padding: 14px 22px;
+  border: 2px dashed var(--outline);
+  border-radius: var(--radius-field);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 16px;
+  white-space: nowrap;
+  box-shadow: var(--shadow-hard);
+}
+.drop-hint span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.player-stage {
+  flex: 1;
+  padding: 20px 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.record-window {
+  flex: 582 1 0;
+  min-width: 360px;
+}
+.record-frame {
+  width: 100%;
+  margin: 8px auto 0;
+  border: 2px solid var(--outline);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.record-frame canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+}
+.player-canvas {
+  display: block;
+  width: 250px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border: 2px solid var(--outline);
+  border-radius: 24px;
+}
+
+.settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.corner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.size-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+}
+.size-toggle {
+  padding: 1px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-height: 48px;
+  font-weight: 700;
+}
+.size-percent {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+/* Joined buttons where one is chosen: alignment and text position. */
+.segmented {
+  display: flex;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-field);
+  overflow: hidden;
+}
+.segmented button {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 4px;
+  border: 0;
+  border-right: 2px solid var(--outline);
+  background: var(--raised);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.segmented button:last-child {
+  border-right: 0;
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--selected);
+  color: var(--on-selected);
+}
+.segmented button:focus-visible {
+  outline-offset: -4px;
+}
+.style-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+.style-buttons {
+  display: flex;
+  gap: 6px;
+}
+.color-input {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--outline);
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+.color-input input {
+  width: 150%;
+  height: 150%;
+  margin: -25%;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.color-input:has(:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.style-buttons .toggle {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 16px;
+}
+.style-bold {
+  font-weight: 800 !important;
+}
+.style-italic {
+  font-style: italic;
+  font-family: Georgia, serif !important;
+}
+.style-underline {
+  text-decoration: underline;
+}
+.style-strike {
+  text-decoration: line-through;
+}
+
+/* The list fills whatever height the settings row gives the combos panel,
+   without making the row taller itself. */
+.combo-scroll {
+  position: relative;
+  flex: 1;
+  min-height: 360px;
+}
+.combo-list {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 6px 10px 2px;
+  border-top: 1.5px dashed var(--moss);
+  border-bottom: 1.5px dashed var(--moss);
+}
+/* Off-screen pairings skip layout, so their fonts load only when scrolled into view. */
+.combo-list > div {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
+}
+.combo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 8px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-field);
+  background: var(--raised);
+  color: var(--text);
+  min-height: 64px;
+}
+.combo[aria-pressed="true"] {
+  background: var(--selected);
+  color: var(--on-selected);
+}
+.combo-swatch {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-xs);
+  border: 1.5px solid var(--outline);
+  display: grid;
+  place-items: center;
+}
+.combo-text {
+  min-width: 0;
+}
+.combo-name {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+.combo-fonts {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.combo[aria-pressed="true"] .combo-fonts {
+  color: var(--on-selected);
+  opacity: 0.85;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.filter {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 400;
+}
+.filter canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 1.5px solid var(--outline);
+  border-radius: 6px;
+}
+.filter[aria-pressed="true"] {
+  font-weight: 700;
+}
+.filter[aria-pressed="true"] canvas {
+  box-shadow: 0 0 0 3px var(--strong);
+}
+.photo-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.thumb {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border: 1.5px solid var(--outline);
+  border-radius: 6px;
+}
+.photo-meta {
+  flex: 1;
+  min-width: 0;
+}
+.photo-name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.export {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 16px;
+  border: 2px solid var(--outline);
+  border-radius: 999px;
+  background: var(--strong);
+  color: var(--on-strong);
+  font-size: 15px;
+  font-weight: 700;
+}
+.export:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--strong) 88%, var(--on-strong));
+}
+.export span {
+  font-size: 13px;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.error {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-field);
+  background: #f6d8d2;
+  font-weight: 700;
+}
+
+/* Cute Matcha's Footer, as every irmahs.dev app ends: where to find more
+   apps, on a pill centred at the bottom */
+.footer {
+  width: fit-content;
+  margin: 8px auto 32px;
+  padding: 6px 14px;
+  border: 2px solid var(--outline);
+  border-radius: 999px;
+  background-color: var(--panel);
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Landing */
+.landing {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px 24px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+  flex: 1;
+}
+.window {
+  min-width: 0;
+  background: var(--accent);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hard);
+  overflow: hidden;
+  color: var(--on-accent);
+}
+.window-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background-color: var(--strong);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 6px 6px;
+  border-bottom: 2px solid var(--outline);
+}
+.window-name {
+  color: var(--on-strong);
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.window-dots {
+  display: flex;
+  gap: 6px;
+}
+.window-dots span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--outline);
+}
+.window-dots span:nth-child(1) {
+  background: var(--plus);
+}
+.window-dots span:nth-child(2) {
+  background: var(--minus);
+}
+.window-dots span:nth-child(3) {
+  background: var(--danger);
+}
+.window-body {
+  padding: 24px;
+}
+
+.hero {
+  flex: 1 1 100%;
+}
+.hero .window-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: center;
+}
+.hero-copy {
+  flex: 1 1 360px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+.badge {
+  display: inline-block;
+  background: var(--accent-soft);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-pill, 999px);
+  box-shadow: var(--shadow-soft);
+  padding: 4px 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--on-accent);
+}
+.hero h1 {
+  margin: 0;
+  font-size: clamp(36px, 6vw, 56px);
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.05;
+}
+.hero-lead {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.45;
+  max-width: 34ch;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.hero-art {
+  flex: 0 1 420px;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 0 40px;
+}
+.hero-cover {
+  width: 300px;
+  max-width: 78%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 2px solid var(--outline);
+  border-radius: 6px;
+  box-shadow: 5px 5px 0 #0f1411;
+}
+.hero-player {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 170px;
+  max-width: 42%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border: 2px solid var(--outline);
+  border-radius: 18px;
+  box-shadow: 4px 4px 0 #0f1411;
+}
+
+.how {
+  flex: 1 1 100%;
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  scroll-margin-top: 24px;
+}
+.step {
+  background: var(--panel);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-xs);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text);
+}
+.step-num {
+  font-family: var(--display);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--outline);
+  background: var(--strong);
+  color: var(--on-strong);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+}
+.step h2 {
+  margin: 0;
+  font-size: 20px;
+  font-family: var(--display);
+  font-weight: 600;
+  text-wrap: balance;
+}
+.step p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.get {
+  flex: 7 1 420px;
+}
+.get-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.get-list li {
+  background: var(--panel);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-xs);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text);
+}
+.get-list strong {
+  font-size: 17px;
+  font-weight: 700;
+}
+.get-list span {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.faq {
+  flex: 5 1 320px;
+}
+.faq-list {
+  margin: 0;
+  background: var(--panel);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-xs);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text);
+}
+.faq-list dt {
+  font-weight: 700;
+  font-size: 16px;
+}
+.faq-list dd {
+  margin: 2px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.cta {
+  flex: 1 1 100%;
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+.cta .pill {
+  align-self: center;
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    padding: 12px 16px;
+  }
+  .brand-name {
+    font-size: 20px;
+  }
+  .maker {
+    padding: 16px;
+    gap: 20px;
+  }
+  .landing {
+    padding: 24px 16px 16px;
+  }
+  .window-body {
+    padding: 16px;
+  }
+  .maker-topbar > .brand,
+  .topbar-end {
+    flex-basis: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+  .cover-window,
+  .player-window,
+  .record-window {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+  .footer {
+    margin-bottom: 24px;
+  }
+}
+
+/* Secondary text straight on a window's lime body is on-accent, like every
+   text on accent; text-muted only reads on ground, panel and raised. */
+.hero-copy .muted {
+  color: var(--on-accent);
+}
+
+.footer a {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+.footer a:hover {
+  text-decoration: underline;
+}
+.brand-name,
+.hero h1 {
+  text-wrap: balance;
+}
+.hero-lead,
+.step p,
+.faq-list dd {
+  text-wrap: pretty;
+}
+
+/* An export that is saving keeps its size and shows one spinner */
+.export[aria-busy="true"]::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.export[aria-busy="true"] span {
+  margin-left: auto;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The account pill while the session is asked for: a skeleton of its exact
+   size, so nothing moves when the answer comes */
+.account--loading {
+  pointer-events: none;
+}
+.account--loading .account-icon {
+  background: var(--raised-hover);
+}
+.account-bar {
+  width: 56px;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--raised-hover);
+  animation: account-pulse 1.2s ease-in-out infinite;
+}
+@keyframes account-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+@media (max-width: 600px) {
+  .account-bar {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-bar,
+  .export[aria-busy="true"]::before {
+    animation: none;
+  }
+  .pill.primary:active {
+    transform: none;
+  }
+}
+
+/* The Tools hub: a hello window over a grid of tool cards. Each card is a
+   window that is the link itself, its name ending in an arrow. */
+/* The page grows to push the footer down; its rows stay at the top */
+.hub {
+  align-content: flex-start;
+}
+.hub-hello {
+  flex: 1 1 100%;
+}
+.hub-hello h1 {
+  margin: 0 0 8px;
+  font-family: var(--display);
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 600;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.hub-hello .hero-lead {
+  max-width: 60ch;
+  margin: 0;
+}
+.tool-cards {
+  flex: 1 1 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+.tool-card:hover {
+  color: var(--on-accent);
+}
+.tool-card:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-soft);
+}
+.tool-card__body {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.tool-card__body > svg {
+  flex: none;
+}
+.tool-card__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+}
+.tool-card__name svg {
+  transition: transform 0.15s;
+}
+.tool-card:hover .tool-card__name svg {
+  transform: translateX(3px);
+}
+.tool-card__blurb {
+  margin: 0;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tool-card,
+  .tool-card__name svg {
+    transition: none;
+  }
+  .tool-card:active {
+    transform: none;
+  }
+}

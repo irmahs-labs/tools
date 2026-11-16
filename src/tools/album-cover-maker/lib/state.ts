@@ -1,0 +1,129 @@
+import type { FilterId } from "./filters";
+import type { SubtitleFont, TextStyle, TitleFont } from "./fonts";
+import { PLAIN } from "./fonts";
+
+export type Corner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+
+export const CORNERS: Corner[] = [
+  "top-left",
+  "top-right",
+  "bottom-left",
+  "bottom-right",
+];
+
+type Row = "top" | "middle" | "bottom";
+
+type Column = "left" | "center" | "right";
+
+export type TextPosition = `${Row}-${Column}`;
+
+/** The nine spots the title and subtitle can sit in, in reading order. */
+export const TEXT_POSITIONS: TextPosition[] = (
+  ["top", "middle", "bottom"] as const
+).flatMap((row) =>
+  (["left", "center", "right"] as const).map(
+    (column): TextPosition => `${row}-${column}`
+  )
+);
+
+export type TextAlign = Column;
+
+export const TEXT_ALIGNS: TextAlign[] = ["left", "center", "right"];
+
+/**
+ * Where the text block is drawn: the spot picked, except that the label
+ * keeps its corner and the text moves to the middle of that side.
+ */
+export const placedText = (
+  state: Pick<CoverState, "labelCorner" | "showLabel" | "textPosition">
+): TextPosition => {
+  const { labelCorner, showLabel, textPosition } = state;
+
+  if (showLabel && textPosition === labelCorner) {
+    return `middle-${textPosition.endsWith("left") ? "left" : "right"}`;
+  }
+
+  return textPosition;
+};
+
+/** The advisory label's sizes, as a % of the cover's width. */
+export const LABEL_SIZES = [
+  { name: "XS", percent: 8 },
+  { name: "S", percent: 10 },
+  { name: "M", percent: 12 },
+  { name: "L", percent: 14 },
+  { name: "XL", percent: 16 },
+  { name: "XXL", percent: 20 },
+] as const;
+
+export interface Photo {
+  image: CanvasImageSource;
+  width: number;
+  height: number;
+  name: string;
+}
+
+export interface CoverState {
+  /** 100-500 (%) */
+  zoom: number;
+  /** -1..1, where the crop sits inside the spare width */
+  panX: number;
+  /** -1..1 */
+  panY: number;
+  filter: FilterId;
+  /** 0-100 (%) */
+  filterStrength: number;
+  showLabel: boolean;
+  /** % of cover width */
+  labelSize: number;
+  labelCorner: Corner;
+  showText: boolean;
+  title: string;
+  subtitle: string;
+  titleFont: TitleFont;
+  subtitleFont: SubtitleFont;
+  titleStyle: TextStyle;
+  subtitleStyle: TextStyle;
+  /** Text colours, as lowercase #rrggbb. */
+  titleColor: string;
+  subtitleColor: string;
+  textPosition: TextPosition;
+  textAlign: TextAlign;
+  playerHue: number;
+  buttonHue: number;
+  comboId: string | null;
+}
+
+export const DEFAULT_STATE: CoverState = {
+  buttonHue: 35,
+  comboId: "abril-fatface-lato",
+  filter: "original",
+  filterStrength: 100,
+  labelCorner: "top-left",
+  labelSize: 10,
+  panX: 0,
+  panY: 0,
+  playerHue: 40,
+  showLabel: true,
+  showText: true,
+  subtitle: "Artist name",
+  subtitleColor: "#fff3cf",
+  subtitleFont: "Lato",
+  subtitleStyle: PLAIN,
+  textAlign: "left",
+  textPosition: "bottom-left",
+  title: "Album title",
+  titleColor: "#fff3cf",
+  titleFont: "Abril Fatface",
+  titleStyle: PLAIN,
+  zoom: 100,
+};
+
+export const slug = (text: string): string =>
+  text
+    .toLowerCase()
+    .normalize("NFKD")
+    .replaceAll(/[̀-ͯ]/gu, "")
+    .replaceAll(/[^a-z0-9]+/gu, "-")
+    // The line above leaves no two dashes together, so at most one at each end.
+    .replaceAll(/^-|-$/gu, "") || "cover";
