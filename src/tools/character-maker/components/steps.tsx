@@ -661,7 +661,7 @@ export const AbilitiesStep = ({ character, update }: StepProps) => {
         <thead>
           <tr>
             <th scope="col">{t.ability}</th>
-            <th scope="col">{language === "fr" ? "Base" : "Base"}</th>
+            <th scope="col">{t.base}</th>
             <th scope="col">{t.background}</th>
             <th scope="col">{t.total}</th>
             <th scope="col">{t.modifier}</th>
