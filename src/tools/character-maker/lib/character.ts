@@ -44,6 +44,11 @@ const featPicks = z.object({
 
 export type FeatPicks = z.infer<typeof featPicks>;
 
+/** The longest a name and the notes may be, as the inputs allow. */
+export const MAX_NAME = 60;
+
+export const MAX_NOTES = 2000;
+
 export const characterSchema = z.object({
   alignment: z.nullable(z.enum(ALIGNMENTS)),
   /** Which of the background's three abilities gets +2 and +1, or all +1. */
@@ -80,8 +85,8 @@ export const characterSchema = z.object({
   /** The Elf's Keen Senses skill. */
   keenSense: z.nullable(skill),
   languages: z.array(z.enum(LANGUAGES)),
-  name: z.string(),
-  notes: z.string(),
+  name: z.string().check(z.maxLength(MAX_NAME)),
+  notes: z.string().check(z.maxLength(MAX_NOTES)),
   /** Cleric's Divine Order or Druid's Primal Order. */
   order: z.nullable(z.string()),
   /** The scores before the background's increases. */

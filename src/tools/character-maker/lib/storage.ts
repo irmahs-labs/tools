@@ -40,8 +40,16 @@ const readRaw = () => {
 export const loadCharacters = (): Character[] => parseCharacters(readRaw());
 
 export const saveCharacters = (characters: readonly Character[]) => {
+  // Only what the schema accepts is stored: what a visitor typed is checked
+  // (its type and its length) before it goes in
+  const checked = characters.flatMap((character) => {
+    const parsed = characterSchema.safeParse(character);
+
+    return parsed.success ? [parsed.data] : [];
+  });
+
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(characters));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(checked));
   } catch {
     // Storage full or off: the character stays on the page for this visit
   }

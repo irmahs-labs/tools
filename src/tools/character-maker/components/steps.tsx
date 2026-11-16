@@ -1,4 +1,5 @@
 import { useLanguage } from "../../../lib/language";
+import { MAX_NAME, MAX_NOTES } from "../lib/character";
 import type { Character } from "../lib/character";
 import {
   ARRAY_VALUES,
@@ -1125,7 +1126,7 @@ export const DetailsStep = ({ character, update }: StepProps) => {
         <input
           className="text"
           value={character.name}
-          maxLength={60}
+          maxLength={MAX_NAME}
           placeholder={t.namePlaceholder}
           onChange={(event) =>
             update((c) => ({ ...c, name: event.target.value }))
@@ -1146,7 +1147,7 @@ export const DetailsStep = ({ character, update }: StepProps) => {
         <textarea
           className="text notes"
           rows={5}
-          maxLength={2000}
+          maxLength={MAX_NOTES}
           value={character.notes}
           onChange={(event) =>
             update((c) => ({ ...c, notes: event.target.value }))
