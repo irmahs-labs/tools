@@ -145,12 +145,12 @@ const ToolMenu = ({
 };
 
 /**
- * Every tool page's header, uncluttered: the tool's logo and name, "Tools
- * · by Irma HS" under it, the page's own buttons (`actions`, and `end`
- * before the shared pills), and the shared pills. Under it, a quiet way
- * back to every tool, then the tool's pages as tabs, the open one lifted in
- * lime. On a
- * phone the tabs give way to the menu.
+ * Every tool page's header, uncluttered: the tool's logo, which goes back
+ * to every tool, and its name, "Tools · by Irma HS" under it, which goes to
+ * the tool's own home; the page's own buttons (`actions`, and `end` before
+ * the shared pills), and the shared pills. Under it, the tool's pages as
+ * tabs, the open one lifted in lime. On a phone the tabs give way to the
+ * menu.
  */
 export const ToolHeader = ({
   slug,
@@ -183,18 +183,25 @@ export const ToolHeader = ({
     <>
       <header className={`topbar ${className}`}>
         <ToolMenu slug={slug} tabs={shown} />
-        <a
-          href={tool.href}
-          onClick={linkTo(tool.href)}
-          className="brand"
-          aria-label={name}
-        >
-          <tool.Logo />
-          <span>
+        <div className="brand">
+          <a
+            href="/"
+            onClick={linkTo("/")}
+            className="brand-logo"
+            aria-label={t.all}
+            title={t.all}
+          >
+            <tool.Logo />
+          </a>
+          <a
+            href={tool.href}
+            onClick={linkTo(tool.href)}
+            className="brand-text"
+          >
             <span className="brand-name">{name}</span>
             <span className="brand-by">{t.app}</span>
-          </span>
-        </a>
+          </a>
+        </div>
         {actions ? <div className="topbar-actions">{actions}</div> : null}
         <div className="topbar-end">
           {end}
@@ -204,9 +211,6 @@ export const ToolHeader = ({
         </div>
       </header>
       <nav className="tool-tabs" aria-label={t.pages(name)}>
-        <a href="/" onClick={linkTo("/")} className="tool-tabs__back">
-          ← {t.all}
-        </a>
         {shown.map((tab) => (
           <a
             key={tab.href}
