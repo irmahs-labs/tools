@@ -65,19 +65,27 @@ describe("landing page", () => {
     }
   });
 
-  it("links back to every tool, from the header and the phone's menu", () => {
+  it("goes back to every tool from the header's logo, and the phone's menu", () => {
     render(<App />);
 
-    const back = screen.getAllByRole("link", {
-      hidden: true,
-      name: "← all tools",
+    expect(
+      screen.getByRole("link", { name: "all tools" }).getAttribute("href")
+    ).toBe("/");
+    expect(
+      screen
+        .getByRole("link", { hidden: true, name: "← all tools" })
+        .getAttribute("href")
+    ).toBe("/");
+  });
+
+  it("keeps the way back to every tool out of the tabs", () => {
+    render(<App />);
+
+    const tabs = screen.getByRole("navigation", {
+      name: "Album Cover Maker: its pages",
     });
 
-    expect(back.length).toBeGreaterThan(0);
-
-    for (const link of back) {
-      expect(link.getAttribute("href")).toBe("/");
-    }
+    expect(tabs.querySelector('a[href="/"]')).toBeNull();
   });
 
   it("shows which page is open on its tab", () => {

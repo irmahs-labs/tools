@@ -727,11 +727,11 @@ export const Maker = () => {
 
   return (
     <div className="page dotted">
-      <ToolHeader
-        slug="album-cover-maker"
-        className="maker-topbar"
-        actions={
-          <>
+      <ToolHeader slug="album-cover-maker" />
+
+      <main className="maker">
+        <div className="maker-toolbar">
+          <div className="maker-toolbar__actions">
             <button
               type="button"
               className="pill primary"
@@ -744,11 +744,9 @@ export const Maker = () => {
               <RestartIcon />
               {t.startOver}
             </button>
-          </>
-        }
-        end={
-          <>
-            <p className="topbar-hint">{t.hint}</p>
+          </div>
+          <div className="maker-toolbar__end">
+            <p className="maker-hint">{t.hint}</p>
             <div
               // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- a <fieldset> would bring its own border, padding and legend layout; this row of buttons is styled as a plain group
               role="group"
@@ -776,11 +774,8 @@ export const Maker = () => {
                 {t.redo}
               </button>
             </div>
-          </>
-        }
-      />
-
-      <main className="maker">
+          </div>
+        </div>
         {errorMessage && (
           <p role="alert" className="error">
             {errorMessage}
