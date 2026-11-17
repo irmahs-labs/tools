@@ -20,7 +20,7 @@ export const Logo = ({ size = 40 }: { size?: number }) => (
       cy="20"
       r="13"
       fill="none"
-      stroke="#4e6152"
+      stroke="#afc584"
       strokeWidth="1"
     />
     <circle
@@ -28,14 +28,14 @@ export const Logo = ({ size = 40 }: { size?: number }) => (
       cy="20"
       r="9"
       fill="none"
-      stroke="#4e6152"
+      stroke="#afc584"
       strokeWidth="1"
     />
     <circle
       cx="20"
       cy="20"
       r="6"
-      fill="#dde87e"
+      fill="#d4dd9c"
       stroke="#2f3b34"
       strokeWidth="1.5"
     />

@@ -1,6 +1,6 @@
 /**
  * Character Maker's icon: a twenty-sided die on a lime tile, its top face
- * in the yellow accent, in fixed Light Matcha colours like every irmahs.dev
+ * in the lighter green, in fixed Light Matcha colours like every irmahs.dev
  * app icon, with a `text` rim so its edge shows on either header.
  */
 export const Logo = ({ size = 40 }: { size?: number }) => (
@@ -24,7 +24,7 @@ export const Logo = ({ size = 40 }: { size?: number }) => (
     />
     <path
       d="M20 13 L26 23 H14 Z"
-      fill="#ffd968"
+      fill="#afc584"
       stroke="#2f3b34"
       strokeWidth="1.5"
       strokeLinejoin="round"

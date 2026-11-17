@@ -1,6 +1,6 @@
 /**
  * The Tools icon: a lime toolbox with a dark lid, its handle on top and a
- * yellow latch, in fixed Light Matcha colours that don't change with the
+ * cream latch, in fixed Light Matcha colours that don't change with the
  * theme, as a favicon's can't. Its `text` rim is dark on Light Matcha and
  * cream on Dark Matcha, so the box's edge shows on either header.
  * public/favicon.svg is the same drawing.
@@ -19,7 +19,7 @@ export const ToolsLogo = ({ size = 40 }: { size?: number }) => (
       width="32"
       height="21"
       rx="4"
-      fill="#dde87e"
+      fill="#d4dd9c"
       stroke="var(--text)"
       strokeWidth="1.5"
     />
@@ -33,7 +33,7 @@ export const ToolsLogo = ({ size = 40 }: { size?: number }) => (
       width="7"
       height="6.5"
       rx="1.5"
-      fill="#ffd968"
+      fill="#fff3cf"
       stroke="#2f3b34"
       strokeWidth="1.5"
     />
