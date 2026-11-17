@@ -83,22 +83,7 @@ const Editing = ({ initial }: { initial: Character }) => {
 
   return (
     <div className="page dotted">
-      <Topbar>
-        <a
-          href={CHARACTER_HOME}
-          onClick={linkTo(CHARACTER_HOME)}
-          className="pill"
-        >
-          {t.back}
-        </a>
-        <a
-          href={sheetPath(character.id)}
-          onClick={linkTo(sheetPath(character.id))}
-          className="pill"
-        >
-          {t.sheet}
-        </a>
-      </Topbar>
+      <Topbar character={character.id} page="edit" />
       <main className="cm">
         <StepNav character={character} step={step} onStep={go} />
         <div className="cm-layout">
@@ -158,7 +143,7 @@ export const Editor = ({ id }: { id: string }) => {
   if (!character) {
     return (
       <div className="page dotted">
-        <Topbar />
+        <Topbar page="edit" />
         <main className="landing">
           <p className="lead">{t.empty}</p>
           <a

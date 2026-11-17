@@ -28,7 +28,7 @@ export const Home = () => {
 
   return (
     <div className="page dotted">
-      <Topbar />
+      <Topbar page="home" />
       <main className="landing cm-home">
         <Window name="hello.txt" className="hub-hello">
           <p className="badge">{t.compatible}</p>

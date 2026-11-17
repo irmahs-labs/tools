@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 
 import type { Language } from "./lib/language";
 import { Logo as AlbumCoverLogo } from "./tools/album-cover-maker/components/logo";
-import { ALBUM_HOME } from "./tools/album-cover-maker/paths";
+import { ALBUM_HOME, ALBUM_MAKER } from "./tools/album-cover-maker/paths";
 import { Logo as CharacterLogo } from "./tools/character-maker/components/logo";
 import { CHARACTER_HOME } from "./tools/character-maker/paths";
 
@@ -19,6 +19,8 @@ export interface Tool {
   /** The card's window name, a file with an extension that exists. */
   legend: string;
   Logo: ComponentType<{ size?: number }>;
+  /** Its own pages, for the phone's menu. */
+  pages: readonly { href: string; name: Record<Language, string> }[];
 }
 
 export const TOOLS: readonly Tool[] = [
@@ -31,6 +33,12 @@ export const TOOLS: readonly Tool[] = [
     href: CHARACTER_HOME,
     legend: "character-maker.exe",
     name: { en: "Character Maker", fr: "Character Maker" },
+    pages: [
+      {
+        href: CHARACTER_HOME,
+        name: { en: "My characters", fr: "Mes personnages" },
+      },
+    ],
     slug: "character-maker",
   },
   {
@@ -42,6 +50,13 @@ export const TOOLS: readonly Tool[] = [
     href: ALBUM_HOME,
     legend: "album-cover-maker.exe",
     name: { en: "Album Cover Maker", fr: "Album Cover Maker" },
+    pages: [
+      { href: ALBUM_HOME, name: { en: "About", fr: "À propos" } },
+      {
+        href: ALBUM_MAKER,
+        name: { en: "Make a cover", fr: "Créer une pochette" },
+      },
+    ],
     slug: "album-cover-maker",
   },
 ];

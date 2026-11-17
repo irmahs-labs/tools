@@ -1,7 +1,5 @@
 import { useCopy } from "../../../lib/language";
-import { linkTo } from "../../../router";
 import { useCharacters } from "../lib/storage";
-import { CHARACTER_HOME, characterPath } from "../paths";
 import { COPY } from "./copy";
 import { CharacterSheet } from "./sheet";
 import { Topbar } from "./topbar";
@@ -13,16 +11,7 @@ export const SheetPage = ({ id }: { id: string }) => {
 
   return (
     <div className="page dotted">
-      <Topbar>
-        <a
-          href={character ? characterPath(character.id) : CHARACTER_HOME}
-          onClick={linkTo(
-            character ? characterPath(character.id) : CHARACTER_HOME
-          )}
-          className="pill"
-        >
-          {character ? t.edit : t.back}
-        </a>
+      <Topbar character={character?.id} page="sheet">
         {character ? (
           <button
             type="button"

@@ -389,7 +389,7 @@ test("makes a level 1 character and shows its sheet, kept after a reload", async
   await expect(sheet.locator(".sheet-stat").nth(1)).toContainText("11");
 
   await page.reload();
-  await page.getByRole("link", { exact: true, name: "see the sheet" }).click();
+  await page.locator(".tool-tab", { hasText: "Sheet" }).click();
   await expect(page.getByRole("heading", { name: "Grenda" })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "print or save as PDF" })
@@ -414,6 +414,7 @@ test("the character pages fit a phone screen without sideways scrolling", async 
 
   expect(await overflow()).toBeLessThanOrEqual(0);
 
-  await page.getByRole("link", { exact: true, name: "see the sheet" }).click();
+  await page.getByRole("button", { name: "Menu" }).click();
+  await page.locator(".tool-drawer__link", { hasText: "Sheet" }).click();
   expect(await overflow()).toBeLessThanOrEqual(0);
 });
