@@ -27,7 +27,6 @@ export const MAKER_COPY = {
     alignment: "Alignment",
     aligns: { center: "center", left: "left", right: "right" },
     buttonsAndText: "Buttons and text",
-    by: "by Irma HS",
     chooseOne: "or click to choose one",
     choosePhoto: "choose photo",
     combosLead: (picked: boolean, count: number) =>
@@ -148,7 +147,6 @@ export const MAKER_COPY = {
     alignment: "Alignement",
     aligns: { center: "centre", left: "gauche", right: "droite" },
     buttonsAndText: "Boutons et texte",
-    by: "par Irma HS",
     chooseOne: "ou cliquez pour en choisir une",
     choosePhoto: "choisir une photo",
     combosLead: (picked: boolean, count: number) =>

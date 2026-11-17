@@ -1,15 +1,12 @@
-import { AccountButton } from "../../../components/account-button";
-import { LanguageToggle } from "../../../components/language-toggle";
-import { ThemeToggle } from "../../../components/theme-toggle";
+import { ToolHeader } from "../../../components/tool-header";
 import { Window } from "../../../components/window";
 import { useCopy } from "../../../lib/language";
 import { linkTo } from "../../../router";
 import { COMBOS } from "../lib/combos";
 import { DEFAULT_STATE } from "../lib/state";
 import type { CoverState } from "../lib/state";
-import { ALBUM_HOME, ALBUM_MAKER } from "../paths";
+import { ALBUM_MAKER } from "../paths";
 import { CoverCanvas, useFontsReady } from "./cover-canvas";
-import { Logo } from "./logo";
 
 const SAMPLE: CoverState = {
   ...DEFAULT_STATE,
@@ -20,7 +17,6 @@ const SAMPLE: CoverState = {
 const COPY = {
   en: {
     badge: "no login needed",
-    by: "by Irma HS",
     cta: "start making your cover",
     faq: [
       {
@@ -64,11 +60,9 @@ const COPY = {
       },
     ],
     title: "Make your album cover in your browser.",
-    tools: "all tools",
   },
   fr: {
     badge: "sans connexion",
-    by: "par Irma HS",
     cta: "commencer votre pochette",
     faq: [
       {
@@ -118,7 +112,6 @@ const COPY = {
       },
     ],
     title: "Créez la pochette de votre album dans votre navigateur.",
-    tools: "tous les outils",
   },
 };
 
@@ -128,26 +121,7 @@ export const Landing = () => {
 
   return (
     <div className="page dotted">
-      <header className="topbar">
-        <a href={ALBUM_HOME} onClick={linkTo(ALBUM_HOME)} className="brand">
-          <Logo />
-          <span>
-            <span className="brand-name">Album Cover Maker</span>
-            <span className="brand-by">{t.by}</span>
-          </span>
-        </a>
-        <div className="topbar-end">
-          <a href="/" onClick={linkTo("/")} className="pill small">
-            {t.tools}
-          </a>
-          <LanguageToggle />
-          <ThemeToggle />
-          <AccountButton />
-          <a href={ALBUM_MAKER} onClick={linkTo(ALBUM_MAKER)} className="pill">
-            {t.make}
-          </a>
-        </div>
-      </header>
+      <ToolHeader slug="album-cover-maker" />
 
       <main className="landing">
         <Window name="hello.txt" className="hero">

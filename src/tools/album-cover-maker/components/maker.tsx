@@ -7,12 +7,9 @@ import {
   useState,
 } from "react";
 
-import { AccountButton } from "../../../components/account-button";
-import { LanguageToggle } from "../../../components/language-toggle";
-import { ThemeToggle } from "../../../components/theme-toggle";
+import { ToolHeader } from "../../../components/tool-header";
 import { Window } from "../../../components/window";
 import { currentLanguage, useCopy } from "../../../lib/language";
-import { linkTo } from "../../../router";
 import {
   buttonColor,
   dominantColor,
@@ -39,7 +36,6 @@ import {
   TEXT_POSITIONS,
 } from "../lib/state";
 import type { CoverState, Photo } from "../lib/state";
-import { ALBUM_HOME } from "../paths";
 import {
   BLANK_BACKGROUND,
   CoverCanvas,
@@ -49,7 +45,6 @@ import {
 import type { Kind } from "./cover-canvas";
 import { filterPhoto } from "./filter-photo";
 import { FontPicker } from "./font-picker";
-import { Logo } from "./logo";
 import { MAKER_COPY } from "./maker-copy";
 import type { MakerCopy } from "./maker-copy";
 
@@ -732,62 +727,58 @@ export const Maker = () => {
 
   return (
     <div className="page dotted">
-      <header className="topbar maker-topbar">
-        <a href={ALBUM_HOME} onClick={linkTo(ALBUM_HOME)} className="brand">
-          <Logo />
-          <span>
-            <span className="brand-name">Album Cover Maker</span>
-            <span className="brand-by">{t.by}</span>
-          </span>
-        </a>
-        <div className="topbar-actions">
-          <button
-            type="button"
-            className="pill primary"
-            onClick={() => setState((s) => feelingLucky(s, photoHues))}
-          >
-            <DiceIcon />
-            {t.lucky}
-          </button>
-          <button type="button" className="pill" onClick={startOver}>
-            <RestartIcon />
-            {t.startOver}
-          </button>
-        </div>
-        <div className="topbar-end">
-          <p className="topbar-hint">{t.hint}</p>
-          <div
-            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- a <fieldset> would bring its own border, padding and legend layout; this row of buttons is styled as a plain group
-            role="group"
-            aria-label={t.history}
-            className="history"
-          >
+      <ToolHeader
+        slug="album-cover-maker"
+        className="maker-topbar"
+        actions={
+          <>
             <button
               type="button"
-              className="pill small"
-              title={t.undoTitle}
-              disabled={history.past.length === 0}
-              onClick={undo}
+              className="pill primary"
+              onClick={() => setState((s) => feelingLucky(s, photoHues))}
             >
-              <UndoIcon />
-              {t.undo}
+              <DiceIcon />
+              {t.lucky}
             </button>
-            <button
-              type="button"
-              className="pill small"
-              title={t.redoTitle}
-              disabled={history.future.length === 0}
-              onClick={redo}
+            <button type="button" className="pill" onClick={startOver}>
+              <RestartIcon />
+              {t.startOver}
+            </button>
+          </>
+        }
+        end={
+          <>
+            <p className="topbar-hint">{t.hint}</p>
+            <div
+              // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- a <fieldset> would bring its own border, padding and legend layout; this row of buttons is styled as a plain group
+              role="group"
+              aria-label={t.history}
+              className="history"
             >
-              <UndoIcon redo />
-              {t.redo}
-            </button>
-          </div>
-          <LanguageToggle />
-          <ThemeToggle />
-          <AccountButton />
-        </div>
-      </header>
+              <button
+                type="button"
+                className="pill small"
+                title={t.undoTitle}
+                disabled={history.past.length === 0}
+                onClick={undo}
+              >
+                <UndoIcon />
+                {t.undo}
+              </button>
+              <button
+                type="button"
+                className="pill small"
+                title={t.redoTitle}
+                disabled={history.future.length === 0}
+                onClick={redo}
+              >
+                <UndoIcon redo />
+                {t.redo}
+              </button>
+            </div>
+          </>
+        }
+      />
 
       <main className="maker">
         {errorMessage && (

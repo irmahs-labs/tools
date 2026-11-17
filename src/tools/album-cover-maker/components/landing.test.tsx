@@ -55,7 +55,7 @@ describe("landing page", () => {
     render(<App />);
 
     for (const name of [
-      "make a cover",
+      "Make a cover",
       "start making",
       "start making your cover",
     ]) {
@@ -65,11 +65,31 @@ describe("landing page", () => {
     }
   });
 
-  it("links back to every tool", () => {
+  it("links back to every tool, from the header and the phone's menu", () => {
     render(<App />);
-    expect(
-      screen.getByRole("link", { name: "all tools" }).getAttribute("href")
-    ).toBe("/");
+
+    const back = screen.getAllByRole("link", {
+      hidden: true,
+      name: "← all tools",
+    });
+
+    expect(back.length).toBeGreaterThan(0);
+
+    for (const link of back) {
+      expect(link.getAttribute("href")).toBe("/");
+    }
+  });
+
+  it("shows which page is open on its tab", () => {
+    render(<App />);
+
+    const tabs = screen.getByRole("navigation", {
+      name: "Album Cover Maker: its pages",
+    });
+
+    const open = tabs.querySelector('[aria-current="page"]');
+
+    expect(open?.textContent).toBe("About");
   });
 
   it("opens the maker in place when you click start making", async () => {

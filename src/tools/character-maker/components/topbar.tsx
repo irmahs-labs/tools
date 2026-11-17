@@ -1,37 +1,44 @@
 import type { ReactNode } from "react";
 
-import { AccountButton } from "../../../components/account-button";
-import { LanguageToggle } from "../../../components/language-toggle";
-import { ThemeToggle } from "../../../components/theme-toggle";
+import { ToolHeader } from "../../../components/tool-header";
 import { useCopy } from "../../../lib/language";
-import { linkTo } from "../../../router";
-import { CHARACTER_HOME } from "../paths";
+import { CHARACTER_HOME, characterPath, sheetPath } from "../paths";
 import { COPY } from "./copy";
-import { Logo } from "./logo";
 
-/** Character Maker's header: its die and name, linking to its own page, the page's buttons, and the shared pills. */
-export const Topbar = ({ children }: { children?: ReactNode }) => {
+/**
+ * Character Maker's header, the one every tool has: its tabs are your
+ * characters, and with one open, its editor and its sheet. `children` are
+ * the page's own buttons, like printing the sheet.
+ */
+export const Topbar = ({
+  character,
+  page,
+  children,
+}: {
+  /** The character open, if any. */
+  character?: string;
+  page: "home" | "edit" | "sheet";
+  children?: ReactNode;
+}) => {
   const t = useCopy(COPY);
 
-  return (
-    <header className="topbar">
-      <a
-        href={CHARACTER_HOME}
-        onClick={linkTo(CHARACTER_HOME)}
-        className="brand"
-      >
-        <Logo />
-        <span>
-          <span className="brand-name">Character Maker</span>
-          <span className="brand-by">{t.by}</span>
-        </span>
-      </a>
-      {children ? <div className="topbar-actions">{children}</div> : null}
-      <div className="topbar-end">
-        <LanguageToggle />
-        <ThemeToggle />
-        <AccountButton />
-      </div>
-    </header>
-  );
+  const tabs = [
+    { current: page === "home", href: CHARACTER_HOME, label: t.myCharacters },
+    ...(character
+      ? [
+          {
+            current: page === "edit",
+            href: characterPath(character),
+            label: t.editTab,
+          },
+          {
+            current: page === "sheet",
+            href: sheetPath(character),
+            label: t.sheetTab,
+          },
+        ]
+      : []),
+  ];
+
+  return <ToolHeader slug="character-maker" tabs={tabs} actions={children} />;
 };
