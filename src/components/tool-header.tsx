@@ -142,8 +142,9 @@ const ToolMenu = ({
 /**
  * Every tool page's header, uncluttered: the tool's logo and name, "Tools
  * · by Irma HS" under it, the page's own buttons (`actions`, and `end`
- * before the shared pills), a way back to every tool, and the shared pills.
- * Under it the tool's pages as tabs, the open one lifted in lime. On a
+ * before the shared pills), and the shared pills. Under it, a quiet way
+ * back to every tool, then the tool's pages as tabs, the open one lifted in
+ * lime. On a
  * phone the tabs give way to the menu.
  */
 export const ToolHeader = ({
@@ -198,15 +199,15 @@ export const ToolHeader = ({
         {actions ? <div className="topbar-actions">{actions}</div> : null}
         <div className="topbar-end">
           {end}
-          <a href="/" onClick={linkTo("/")} className="pill small tool-back">
-            ← {t.all}
-          </a>
           <LanguageToggle />
           <ThemeToggle />
           <AccountButton />
         </div>
       </header>
       <nav className="tool-tabs" aria-label={t.pages(name)}>
+        <a href="/" onClick={linkTo("/")} className="tool-tabs__back">
+          ← {t.all}
+        </a>
         {shown.map((tab) => (
           <a
             key={tab.href}
