@@ -31,7 +31,7 @@ export const navigate = (to: string) => {
 };
 
 /** The parts of a link's click event that linkTo reads. */
-type LinkClick = Pick<
+export type LinkClick = Pick<
   React.MouseEvent<HTMLAnchorElement>,
   "altKey" | "button" | "ctrlKey" | "metaKey" | "preventDefault" | "shiftKey"
 >;
