@@ -2020,6 +2020,21 @@ fieldset.segmented {
   overflow-x: auto;
   scrollbar-width: none;
 }
+/* The way back to every tool: quiet, before the tabs, not one of them */
+.tool-tabs__back {
+  flex: none;
+  align-self: center;
+  margin-right: 10px;
+  padding: 6px 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.tool-tabs__back:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
 .tool-tab {
   flex: none;
   padding: 8px 16px;
@@ -2125,8 +2140,7 @@ fieldset.segmented {
   color: var(--on-selected);
 }
 @media (max-width: 600px) {
-  .tool-tabs,
-  .topbar .tool-back {
+  .tool-tabs {
     display: none;
   }
   .topbar .tool-menu-button {
