@@ -2,8 +2,11 @@ import { useRef } from "react";
 import type { ReactNode } from "react";
 
 import { useCopy, useLanguage } from "../lib/language";
+import type { Language } from "../lib/language";
 import { linkTo, usePath, withoutTrailingSlashes } from "../router";
+import type { LinkClick } from "../router";
 import { TOOLS } from "../tools";
+import type { Tool } from "../tools";
 import { AccountButton } from "./account-button";
 import { LanguageToggle } from "./language-toggle";
 import { ThemeToggle } from "./theme-toggle";
@@ -33,6 +36,14 @@ export interface ToolTab {
   label: string;
   current?: boolean;
 }
+
+/** A tool's own pages as tabs, the one at `path` open. */
+const tabsOf = (tool: Tool, language: Language, path: string): ToolTab[] =>
+  tool.pages.map((page) => ({
+    current: page.href === path,
+    href: page.href,
+    label: page.name[language],
+  }));
 
 const MenuIcon = ({ close = false }: { close?: boolean }) => (
   <svg
@@ -67,11 +78,10 @@ const ToolMenu = ({
   const drawer = useRef<HTMLDialogElement>(null);
   const close = () => drawer.current?.close();
 
-  const go =
-    (href: string) => (event: Parameters<ReturnType<typeof linkTo>>[0]) => {
-      close();
-      linkTo(href)(event);
-    };
+  const go = (href: string) => (event: LinkClick) => {
+    close();
+    linkTo(href)(event);
+  };
 
   return (
     <>
@@ -95,7 +105,7 @@ const ToolMenu = ({
           }
         }}
       >
-        <nav className="tool-drawer__body" aria-label={t.tools}>
+        <nav className="tool-drawer__body">
           <button
             type="button"
             className="tool-menu-button tool-drawer__close"
@@ -111,25 +121,20 @@ const ToolMenu = ({
             <section key={tool.slug} className="tool-drawer__tool">
               <h2 className="tool-drawer__title">{tool.name[language]}</h2>
               <ul className="tool-drawer__pages">
-                {(tool.slug === slug
-                  ? tabs
-                  : tool.pages.map((page) => ({
-                      current: false,
-                      href: page.href,
-                      label: page.name[language],
-                    }))
-                ).map((tab) => (
-                  <li key={tab.href}>
-                    <a
-                      href={tab.href}
-                      onClick={go(tab.href)}
-                      className="tool-drawer__link"
-                      aria-current={tab.current ? "page" : undefined}
-                    >
-                      {tab.label}
-                    </a>
-                  </li>
-                ))}
+                {(tool.slug === slug ? tabs : tabsOf(tool, language, "")).map(
+                  (tab) => (
+                    <li key={tab.href}>
+                      <a
+                        href={tab.href}
+                        onClick={go(tab.href)}
+                        className="tool-drawer__link"
+                        aria-current={tab.current ? "page" : undefined}
+                      >
+                        {tab.label}
+                      </a>
+                    </li>
+                  )
+                )}
               </ul>
             </section>
           ))}
@@ -172,13 +177,7 @@ export const ToolHeader = ({
   const name = tool.name[language];
   const path = withoutTrailingSlashes(usePath());
 
-  const shown =
-    tabs ??
-    tool.pages.map((page) => ({
-      current: page.href === path,
-      href: page.href,
-      label: page.name[language],
-    }));
+  const shown = tabs ?? tabsOf(tool, language, path);
 
   return (
     <>

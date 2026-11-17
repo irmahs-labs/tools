@@ -2063,9 +2063,9 @@ fieldset.segmented {
   outline: 3px solid var(--focus);
   outline-offset: -3px;
 }
-.topbar .tool-menu-button,
-.tool-drawer .tool-menu-button {
-  display: none;
+/* The round icon button: the phone menu's opener and its close button. */
+.tool-menu-button {
+  display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
@@ -2077,8 +2077,11 @@ fieldset.segmented {
   background: var(--raised);
   color: var(--text);
 }
-.tool-drawer .tool-drawer__close {
-  display: inline-flex;
+/* The opener shows only on a phone. */
+.topbar .tool-menu-button {
+  display: none;
+}
+.tool-drawer__close {
   align-self: flex-end;
 }
 .tool-drawer {
