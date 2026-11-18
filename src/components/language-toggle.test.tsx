@@ -18,10 +18,10 @@ describe("the header's language pill", () => {
   it("puts the page in French and back, and remembers it", async () => {
     const user = userEvent.setup();
     render(<App />);
-    const english = screen.getByRole("button", { name: "English" });
+    const english = screen.getByRole("button", { name: "EN, English" });
     expect(english.getAttribute("aria-pressed")).toBe("true");
 
-    await user.click(screen.getByRole("button", { name: "Français" }));
+    await user.click(screen.getByRole("button", { name: "FR, Français" }));
     expect(
       screen.getByRole("heading", {
         name: "De petits outils pour créer.",
@@ -30,7 +30,7 @@ describe("the header's language pill", () => {
     expect(localStorage.getItem("lang")).toBe("fr");
     expect(document.documentElement.lang).toBe("fr");
 
-    await user.click(screen.getByRole("button", { name: "English" }));
+    await user.click(screen.getByRole("button", { name: "EN, English" }));
     expect(
       screen.getByRole("heading", {
         name: "Little tools for making things.",

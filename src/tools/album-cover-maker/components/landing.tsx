@@ -1,3 +1,4 @@
+import { Footer } from "../../../components/footer";
 import { ToolHeader } from "../../../components/tool-header";
 import { Window } from "../../../components/window";
 import { useCopy } from "../../../lib/language";
@@ -42,7 +43,6 @@ const COPY = {
     ],
     how: "how it works",
     lead: "Drop in a photo, add your title and export a 3000 × 3000 PNG. No sign-up, no account, nothing to install.",
-    more: "more apps at",
     start: "start making",
     steps: [
       {
@@ -93,7 +93,6 @@ const COPY = {
     ],
     how: "comment ça marche",
     lead: "Déposez une photo, ajoutez votre titre et exportez un PNG de 3000 × 3000. Sans inscription, sans compte, rien à installer.",
-    more: "plus d’apps sur",
     start: "commencer",
     steps: [
       {
@@ -208,9 +207,7 @@ export const Landing = () => {
         </div>
       </main>
 
-      <footer className="footer">
-        {t.more} <a href="https://irmahs.dev">irmahs.dev</a>
-      </footer>
+      <Footer />
     </div>
   );
 };

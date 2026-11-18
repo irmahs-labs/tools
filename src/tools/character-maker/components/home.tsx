@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { Footer } from "../../../components/footer";
 import { Window } from "../../../components/window";
 import { useCopy, useLanguage } from "../../../lib/language";
 import { linkTo, navigate } from "../../../router";
@@ -103,9 +104,7 @@ export const Home = () => {
         <p className="hint center">{t.savedHere}</p>
         <p className="credit">{t.credit}</p>
       </main>
-      <footer className="footer">
-        {t.more} <a href="https://irmahs.dev">irmahs.dev</a>
-      </footer>
+      <Footer />
     </div>
   );
 };
