@@ -7,8 +7,8 @@ const COPY = {
 };
 
 /**
- * The end of every Tools page: "more apps at irmahs.dev", then every
- * irmahs.dev app and the legal pages.
+ * The end of every Tools page: "more apps at irmahs.dev", then the
+ * legal pages on irmahs.dev.
  */
 export const Footer = () => {
   const t = useCopy(COPY);
