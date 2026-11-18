@@ -2,6 +2,7 @@ import { useLanguage } from "../lib/language";
 import { linkTo } from "../router";
 import { TOOLS } from "../tools";
 import { AccountButton } from "./account-button";
+import { Footer } from "./footer";
 import { LanguageToggle } from "./language-toggle";
 import { ThemeToggle } from "./theme-toggle";
 import { ToolsLogo } from "./tools-logo";
@@ -11,13 +12,11 @@ const COPY = {
   en: {
     by: "by Irma HS",
     lead: "Free, in your browser, nothing to install. Pick one and get making.",
-    more: "more apps at",
     title: "Little tools for making things.",
   },
   fr: {
     by: "par Irma HS",
     lead: "Gratuits, dans votre navigateur, rien à installer. Choisissez-en un et lancez-vous.",
-    more: "plus d’apps sur",
     title: "De petits outils pour créer.",
   },
 };
@@ -72,10 +71,10 @@ export const Hub = () => {
               <a
                 href={tool.href}
                 onClick={linkTo(tool.href)}
-                aria-label={tool.name[language]}
                 className="window tool-card"
               >
-                <div className="window-bar">
+                {/* The file name is decoration: the card is named by its title */}
+                <div className="window-bar" aria-hidden="true">
                   <span className="window-name">{tool.legend}</span>
                   <span className="window-dots" aria-hidden="true">
                     <span />
@@ -99,9 +98,7 @@ export const Hub = () => {
         </ul>
       </main>
 
-      <footer className="footer">
-        {t.more} <a href="https://irmahs.dev">irmahs.dev</a>
-      </footer>
+      <Footer />
     </div>
   );
 };

@@ -427,19 +427,19 @@ describe("maker: parental advisory", () => {
   it("offers six sizes, XS to XXL, each with its percentage", () => {
     render(<Maker />);
     expect(sizeButtons().map((b) => b.textContent)).toEqual([
-      "XS8%",
-      "S10%",
-      "M12%",
-      "L14%",
-      "XL16%",
-      "XXL20%",
+      "XS 8%",
+      "S 10%",
+      "M 12%",
+      "L 14%",
+      "XL 16%",
+      "XXL 20%",
     ]);
   });
 
   it("starts on S, 10% of the width", () => {
     render(<Maker />);
     const pressedSizes = sizeButtons().filter(pressed);
-    expect(pressedSizes.map((b) => b.textContent)).toEqual(["S10%"]);
+    expect(pressedSizes.map((b) => b.textContent)).toEqual(["S 10%"]);
     expect(screen.getByText("10% of the width")).toBeTruthy();
   });
 
@@ -450,7 +450,7 @@ describe("maker: parental advisory", () => {
       sizeButtons()
         .filter(pressed)
         .map((b) => b.textContent)
-    ).toEqual(["XXL20%"]);
+    ).toEqual(["XXL 20%"]);
     expect(screen.getByText("20% of the width")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "XS 8%" }));
     expect(screen.getByText("8% of the width")).toBeTruthy();
@@ -590,7 +590,7 @@ const redoButton = () =>
 const sizePressed = () =>
   sizeButtons()
     .filter(pressed)
-    .map((b) => b.getAttribute("aria-label"));
+    .map((b) => b.textContent);
 
 describe("maker: undo and redo", () => {
   it("has nothing to undo or redo at the start", () => {

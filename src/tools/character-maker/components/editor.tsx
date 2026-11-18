@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { Footer } from "../../../components/footer";
 import { Window } from "../../../components/window";
 import { useCopy } from "../../../lib/language";
 import { linkTo } from "../../../router";
@@ -128,9 +129,7 @@ const Editing = ({ initial }: { initial: Character }) => {
           </Window>
         </div>
       </main>
-      <footer className="footer">
-        {t.more} <a href="https://irmahs.dev">irmahs.dev</a>
-      </footer>
+      <Footer />
     </div>
   );
 };

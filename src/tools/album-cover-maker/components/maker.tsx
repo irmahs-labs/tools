@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 
+import { Footer } from "../../../components/footer";
 import { ToolHeader } from "../../../components/tool-header";
 import { Window } from "../../../components/window";
 import { currentLanguage, useCopy } from "../../../lib/language";
@@ -730,6 +731,7 @@ export const Maker = () => {
       <ToolHeader slug="album-cover-maker" />
 
       <main className="maker">
+        <h1 className="visually-hidden">Album Cover Maker</h1>
         <div className="maker-toolbar">
           <div className="maker-toolbar__actions">
             <button
@@ -926,6 +928,7 @@ export const Maker = () => {
                 accept="image/*"
                 className="visually-hidden"
                 id="photo-file"
+                aria-label={t.choosePhoto}
                 onChange={(e) => {
                   openFile(e.target.files?.[0]);
                   e.target.value = "";
@@ -1243,13 +1246,11 @@ export const Maker = () => {
                       key={name}
                       type="button"
                       className="toggle size-toggle"
-                      aria-label={`${name} ${percent}%`}
                       aria-pressed={state.labelSize === percent}
                       disabled={!state.showLabel}
                       onClick={() => set("labelSize", percent)}
                     >
-                      {name}
-                      <span className="size-percent">{percent}%</span>
+                      {name} <span className="size-percent">{percent}%</span>
                     </button>
                   ))}
                 </div>
@@ -1336,9 +1337,7 @@ export const Maker = () => {
           </fieldset>
         </form>
       </main>
-      <footer className="footer">
-        {t.more} <a href="https://irmahs.dev">irmahs.dev</a>
-      </footer>
+      <Footer />
     </div>
   );
 };
