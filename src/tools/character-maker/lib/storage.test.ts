@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { MAX_NAME, newCharacter } from "./character";
 import {
+  MAX_SLOTS,
   STORAGE_KEY,
   deleteCharacter,
   loadCharacters,
@@ -43,5 +44,28 @@ describe("characters in this browser", () => {
     localStorage.setItem(STORAGE_KEY, "{not json");
 
     expect(loadCharacters()).toEqual([]);
+  });
+
+  it("keeps five characters at most, and never saves over one", () => {
+    for (let index = 0; index < MAX_SLOTS; index += 1) {
+      expect(saveCharacter(newCharacter(`c${index}`))).toBe(true);
+    }
+
+    expect(saveCharacter(newCharacter("sixth"))).toBe(false);
+    expect(loadCharacters()).toHaveLength(MAX_SLOTS);
+    // A character already here still saves
+    expect(saveCharacter({ ...newCharacter("c0"), name: "Ana" })).toBe(true);
+    expect(loadCharacters()[0]?.name).toBe("Ana");
+  });
+
+  it("reads saves from before subclasses and packs", () => {
+    const { packs: _packs, subclass: _subclass, ...old } = newCharacter("old");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([old]));
+
+    expect(loadCharacters()[0]).toMatchObject({
+      id: "old",
+      packs: ["srd-5.2.1"],
+      subclass: null,
+    });
   });
 });

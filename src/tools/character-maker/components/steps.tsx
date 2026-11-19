@@ -65,6 +65,7 @@ import {
   SPECIES,
 } from "../lib/srd/origins";
 import type { InitiateList, OriginFeat } from "../lib/srd/origins";
+import { subclassesOf } from "../lib/srd/subclasses";
 import { distance } from "../lib/words";
 import { Choices, Left } from "./choices";
 import { COPY } from "./copy";
@@ -108,6 +109,26 @@ export const ClassStep = ({ character, update }: StepProps) => {
           onPick={(id) => update((c) => setClass(c, id))}
         />
       </fieldset>
+
+      {info ? (
+        <fieldset className="panel">
+          <legend>{t.subclass}</legend>
+          <Choices
+            legend={t.subclassPick}
+            hint={t.subclassHint}
+            wide
+            options={subclassesOf(info.id).map((entry) => ({
+              detail: entry.features
+                .map((feature) => feature.name[language])
+                .join(" · "),
+              id: entry.id,
+              label: entry.name[language],
+            }))}
+            chosen={character.subclass ? [character.subclass] : []}
+            onPick={(id) => update((c) => ({ ...c, subclass: id }))}
+          />
+        </fieldset>
+      ) : null}
 
       {info?.order ? (
         <fieldset className="panel">

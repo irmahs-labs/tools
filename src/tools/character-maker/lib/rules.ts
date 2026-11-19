@@ -32,6 +32,8 @@ import type {
 } from "./srd/origins";
 import { SPELLS } from "./srd/spells";
 import type { Spell } from "./srd/spells";
+import { SUBCLASSES } from "./srd/subclasses";
+import type { Subclass } from "./srd/subclasses";
 
 /**
  * The rules of SRD 5.2.1's "Character Creation" for a level 1 character, as
@@ -53,6 +55,12 @@ export const speciesOf = (c: Character): Species | null =>
 export const variantOf = (c: Character): Variant | null =>
   speciesOf(c)?.variants?.options.find((entry) => entry.id === c.variant) ??
   null;
+
+/** The subclass picked, if it belongs to the class picked. */
+export const subclassOf = (c: Character): Subclass | null =>
+  SUBCLASSES.find(
+    (entry) => entry.id === c.subclass && entry.classId === c.classId
+  ) ?? null;
 
 export const orderOf = (c: Character): Order | null =>
   classOf(c)?.order?.options.find((entry) => entry.id === c.order) ?? null;
@@ -516,6 +524,20 @@ export const featuresOf = (c: Character): Trait[] => {
     features.push(...info.features);
   }
 
+  const subclass = subclassOf(c);
+
+  if (subclass) {
+    features.push(
+      ...subclass.features.map((feature) => ({
+        name: {
+          en: `${subclass.name.en}: ${feature.name.en}`,
+          fr: `${subclass.name.fr} : ${feature.name.fr}`,
+        },
+        text: feature.text,
+      }))
+    );
+  }
+
   if (info?.order && order) {
     features.push({
       name: {
@@ -746,7 +768,10 @@ export const choicesLeft = (c: Character): Record<Step, number> => {
 
   return {
     abilities: left(scoresReady(c)),
-    class: left(Boolean(info)) + (info?.order ? left(Boolean(orderOf(c))) : 0),
+    class:
+      left(Boolean(info)) +
+      (info ? left(Boolean(subclassOf(c))) : 0) +
+      (info?.order ? left(Boolean(orderOf(c))) : 0),
     details: left(c.name.trim().length > 0) + left(Boolean(c.alignment)),
     equipment: 0,
     origin:

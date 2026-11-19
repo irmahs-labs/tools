@@ -1,5 +1,9 @@
 import * as z from "zod/mini";
+// zod's catch(): a schema that falls back to a value, named so it does not
+// read as a Promise
+import { catch as withFallback } from "zod/mini";
 
+import { DEFAULT_PACKS } from "./packs";
 import { CLASS_IDS } from "./srd/classes";
 import { ABILITIES, ALIGNMENTS, LANGUAGES, SKILLS } from "./srd/core";
 import type { Ability } from "./srd/core";
@@ -89,6 +93,11 @@ export const characterSchema = z.object({
   notes: z.string().check(z.maxLength(MAX_NOTES)),
   /** Cleric's Divine Order or Druid's Primal Order. */
   order: z.nullable(z.string()),
+  /** The rule packs it was made with, by id; saves from before packs had only the SRD 5.2.1. */
+  packs: withFallback(
+    z.array(z.string().check(z.maxLength(64))).check(z.maxLength(20)),
+    [...DEFAULT_PACKS]
+  ),
   /** The scores before the background's increases. */
   scores: z.object({
     base: scores,
@@ -108,6 +117,8 @@ export const characterSchema = z.object({
       "tiefling",
     ])
   ),
+  /** The subclass, picked at the start; none in saves from before subclasses. */
+  subclass: withFallback(z.nullable(z.string().check(z.maxLength(64))), null),
   /** The level 1 spells prepared, or for a Wizard, in the spellbook. */
   spells: z.array(z.string()),
   /** The Wizard's prepared spells, from the spellbook. */
@@ -168,11 +179,13 @@ export const newCharacter = (
   name: "",
   notes: "",
   order: null,
+  packs: [...DEFAULT_PACKS],
   prepared: [],
   scores: { base: { ...BASE_SCORES }, method: "points" },
   size: null,
   speciesId: null,
   spells: [],
+  subclass: null,
   updatedAt: now.toISOString(),
   variant: null,
   weaponMasteries: [],

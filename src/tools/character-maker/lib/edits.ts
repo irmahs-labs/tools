@@ -39,6 +39,7 @@ export const setClass = (c: Character, classId: ClassId): Character =>
             ? { ...c.scores, base: { ...SUGGESTED_ARRAY[classId] } }
             : c.scores,
         spells: [],
+        subclass: null,
         weaponMasteries: [],
       };
 

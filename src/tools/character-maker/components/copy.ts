@@ -31,8 +31,33 @@ export const COPY = {
     credit:
       "This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.",
     damage: "Damage",
+    cancel: "keep it",
     delete: "delete",
-    deleteSure: "sure? press again",
+    deleteForGood: "delete",
+    deleteLead:
+      "It can't be undone. Keep a copy first: the sheet as a PDF, or the character file to import again later.",
+    deleteTitle: (name: string) => `Delete ${name}?`,
+    exportJson: "export JSON",
+    exportPdf: "export PDF",
+    full: (max: number) =>
+      `You have ${max} characters, the most this browser keeps. Delete one to make or import another.`,
+    imported: (name: string) => `${name} is imported.`,
+    importFailed: {
+      damaged: "This character file is damaged: it can't be imported.",
+      newer:
+        "This file comes from a newer Character Maker: reload the page and try again.",
+      notCharacter: "That isn't a Character Maker character file (.json).",
+    },
+    importJson: "import a character",
+    importPack: (pack: string) =>
+      `This character needs the rule pack “${pack}”, which this browser doesn't have.`,
+    packs: "Rules",
+    characterSlots: (used: number, max: number) =>
+      `${used} of ${max} character slots used.`,
+    subclass: "Subclass",
+    subclassHint:
+      "Picked now, though the rules give it at level 3: its features are on your sheet.",
+    subclassPick: "Your subclass",
     details: "Details",
     edit: "edit",
     editTab: "Edit",
@@ -152,8 +177,34 @@ export const COPY = {
     credit:
       "Cette œuvre inclut du matériel issu du System Reference Document 5.2.1 (« SRD 5.2.1 ») de Wizards of the Coast LLC, disponible à l’adresse https://www.dndbeyond.com/srd. Le SRD 5.2.1 est régi par la Licence Creative Commons Attribution 4.0 International, disponible à l’adresse https://creativecommons.org/licenses/by/4.0/legalcode.",
     damage: "Dégâts",
+    cancel: "le garder",
     delete: "supprimer",
-    deleteSure: "sûr ? appuyez encore",
+    deleteForGood: "supprimer",
+    deleteLead:
+      "C’est définitif. Gardez-en une copie d’abord : la fiche en PDF, ou le fichier du personnage pour l’importer plus tard.",
+    deleteTitle: (name: string) => `Supprimer ${name} ?`,
+    exportJson: "exporter en JSON",
+    exportPdf: "exporter en PDF",
+    full: (max: number) =>
+      `Vous avez ${max} personnages, le maximum que ce navigateur garde. Supprimez-en un pour en créer ou en importer un autre.`,
+    imported: (name: string) => `${name} est importé.`,
+    importFailed: {
+      damaged: "Ce fichier de personnage est abîmé : impossible de l’importer.",
+      newer:
+        "Ce fichier vient d’une version plus récente de Character Maker : rechargez la page et réessayez.",
+      notCharacter:
+        "Ce n’est pas un fichier de personnage de Character Maker (.json).",
+    },
+    importJson: "importer un personnage",
+    importPack: (pack: string) =>
+      `Ce personnage a besoin du module de règles « ${pack} », que ce navigateur n’a pas.`,
+    packs: "Règles",
+    characterSlots: (used: number, max: number) =>
+      `${used} emplacement${used > 1 ? "s" : ""} de personnage sur ${max} utilisé${used > 1 ? "s" : ""}.`,
+    subclass: "Sous-classe",
+    subclassHint:
+      "Choisie dès maintenant, même si les règles la donnent au niveau 3 : ses aptitudes sont sur votre fiche.",
+    subclassPick: "Votre sous-classe",
     details: "Détails",
     edit: "modifier",
     editTab: "Modifier",

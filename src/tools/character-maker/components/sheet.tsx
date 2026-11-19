@@ -11,6 +11,7 @@ import {
   sheetOf,
   speciesCantrips,
   speciesOf,
+  subclassOf,
   spellById,
   toolProficiencies,
   variantOf,
@@ -67,6 +68,7 @@ const Head = ({ character, language, t }: PartProps) => {
   const species = speciesOf(character);
   const variant = variantOf(character);
   const background = backgroundOf(character);
+  const subclass = subclassOf(character);
 
   const speciesName =
     species && variant
@@ -79,7 +81,9 @@ const Head = ({ character, language, t }: PartProps) => {
       <p className="sheet-sub">
         {[
           t.level1,
-          info?.name[language],
+          info && subclass
+            ? `${info.name[language]} (${subclass.name[language]})`
+            : info?.name[language],
           speciesName,
           background?.name[language],
           character.alignment
