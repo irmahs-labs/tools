@@ -16,6 +16,7 @@ import {
   dominantColor,
   dominantHues,
   playerColor,
+  wrapHue,
 } from "../lib/color";
 import { COMBOS, suggestCombos } from "../lib/combos";
 import type { Suggestion } from "../lib/combos";
@@ -23,7 +24,6 @@ import { cssFilter, FILTERS } from "../lib/filters";
 import { SUBTITLE_FONTS, TITLE_FONTS, cssFont } from "../lib/fonts";
 import type { TextStyle } from "../lib/fonts";
 import { historyReducer, startHistory } from "../lib/history";
-import type { History, HistoryAction } from "../lib/history";
 import { feelingLucky } from "../lib/lucky";
 import { photoRect } from "../lib/render";
 import type { Box } from "../lib/render";
@@ -36,7 +36,7 @@ import {
   TEXT_ALIGNS,
   TEXT_POSITIONS,
 } from "../lib/state";
-import type { CoverState, Photo } from "../lib/state";
+import type { CoverState, Photo, TextPosition } from "../lib/state";
 import {
   BLANK_BACKGROUND,
   CoverCanvas,
@@ -297,8 +297,6 @@ const comboSettings = (sug: Suggestion) => ({
   titleStyle: sug.combo.titleStyle,
 });
 
-const wrapHue = (h: number) => ((Math.round(h) % 360) + 360) % 360;
-
 const LockIcon = ({ open }: { open: boolean }) => (
   <svg
     width="16"
@@ -341,27 +339,13 @@ const third = (v: number) => Math.min(2, Math.max(0, Math.floor(v * 3)));
 const spotAt = (p: { x: number; y: number }) =>
   `${ROWS[third(p.y)]}-${COLUMNS[third(p.x)]}` as const;
 
-/** A text spot, "top-left", in words in the page's language. */
-const spotName = (
-  spot: `${(typeof ROWS)[number]}-${(typeof COLUMNS)[number]}`,
-  t: MakerCopy
-) => {
+/** A text spot's row and column: "top-left" → ["top", "left"]. */
+const spotParts = (spot: TextPosition) =>
   // SAFETY: a text spot is always "<row>-<column>".
-  const [r, c] = spot.split("-") as [
-    (typeof ROWS)[number],
-    (typeof COLUMNS)[number],
-  ];
-
-  return t.spot(r, c);
-};
+  spot.split("-") as [(typeof ROWS)[number], (typeof COLUMNS)[number]];
 
 const hueTrack = (s: number, l: number) =>
   `linear-gradient(90deg, ${[0, 60, 120, 180, 240, 300, 360].map((h) => `hsl(${h} ${s}% ${l}%)`).join(", ")})`;
-
-const coverHistory = (
-  history: History<CoverState>,
-  action: HistoryAction<CoverState>
-) => historyReducer(history, action);
 
 /** Whether a key press belongs to a text field's own editing, undo included. */
 const inTextField = (target: EventTarget | null) =>
@@ -392,13 +376,20 @@ const coverCursor = (onText: boolean, hasPhoto: boolean) => {
   return hasPhoto ? "draggable" : undefined;
 };
 
+/** The export buttons, in order, with the format and size each saves. */
+const EXPORT_BUTTONS: readonly { kind: Kind; format: string }[] = [
+  { format: "PNG · 3000 × 3000", kind: "cover" },
+  { format: "PNG · 1080 × 1440", kind: "player" },
+  { format: "JPEG · 3000 × 2000", kind: "record" },
+];
+
 /** An export button's label, while that export is saving or not. */
 const exportLabel = (busy: Kind | null, kind: Kind, t: MakerCopy) =>
   busy === kind ? t.saving : t.exports[kind];
 
 export const Maker = () => {
   const [history, dispatch] = useReducer(
-    coverHistory,
+    historyReducer<CoverState>,
     DEFAULT_STATE,
     startHistory
   );
@@ -464,6 +455,19 @@ export const Maker = () => {
       return { ...s, ...turned, comboId: null, [which]: hue };
     }, "hues");
 
+  // A photo's object URL is freed once another photo, or none, takes its place.
+  const replacePhoto = useCallback(
+    (next: Photo | null) =>
+      setPhoto((prev) => {
+        if (prev?.image instanceof HTMLImageElement) {
+          URL.revokeObjectURL(prev.image.src);
+        }
+
+        return next;
+      }),
+    []
+  );
+
   const fileInput = useRef<HTMLInputElement>(null);
   const fontsTick = useFontsReady(state);
   const [coverBox, coverWidth] = useElementWidth<HTMLDivElement>(500);
@@ -502,22 +506,16 @@ export const Maker = () => {
 
       try {
         const { photo: next, hues, color } = await loadPhoto(file);
-        setPhoto((prev) => {
-          if (prev?.image instanceof HTMLImageElement) {
-            URL.revokeObjectURL(prev.image.src);
-          }
-
-          return next;
-        });
+        replacePhoto(next);
         setPhotoHues(hues);
         setPhotoColor(color);
         setErrorMessage(null);
         // Re-frame the photo and re-apply the chosen combo with its colours,
         // as one step.
+        const fresh = suggestCombos(hues);
         setState((s) => {
           const current =
-            suggestCombos(hues).find((x) => x.combo.id === s.comboId) ??
-            suggestCombos(hues)[0];
+            fresh.find((x) => x.combo.id === s.comboId) ?? fresh[0];
 
           return {
             ...s,
@@ -533,7 +531,7 @@ export const Maker = () => {
         setErrorMessage((error as Error).message);
       }
     },
-    [setState]
+    [replacePhoto, setState]
   );
 
   // Drag the title to one of nine spots, or anywhere else to move the photo
@@ -699,13 +697,7 @@ export const Maker = () => {
       return;
     }
 
-    setPhoto((prev) => {
-      if (prev?.image instanceof HTMLImageElement) {
-        URL.revokeObjectURL(prev.image.src);
-      }
-
-      return null;
-    });
+    replacePhoto(null);
     setPhotoHues([40]);
     setPhotoColor(BLANK_BACKGROUND);
     setErrorMessage(null);
@@ -720,11 +712,7 @@ export const Maker = () => {
     [state]
   );
 
-  // SAFETY: a TextPosition is always "<row>-<column>".
-  const [row, column] = state.textPosition.split("-") as [
-    (typeof ROWS)[number],
-    (typeof COLUMNS)[number],
-  ];
+  const [row, column] = spotParts(state.textPosition);
 
   return (
     <div className="page dotted">
@@ -1008,36 +996,19 @@ export const Maker = () => {
 
             <fieldset className="panel grow">
               <legend>{t.legends.export}</legend>
-              <button
-                type="button"
-                className="export"
-                aria-busy={busy === "cover"}
-                disabled={busy !== null}
-                onClick={() => doExport("cover")}
-              >
-                {exportLabel(busy, "cover", t)}
-                <span>PNG · 3000 × 3000</span>
-              </button>
-              <button
-                type="button"
-                className="export"
-                aria-busy={busy === "player"}
-                disabled={busy !== null}
-                onClick={() => doExport("player")}
-              >
-                {exportLabel(busy, "player", t)}
-                <span>PNG · 1080 × 1440</span>
-              </button>
-              <button
-                type="button"
-                className="export"
-                aria-busy={busy === "record"}
-                disabled={busy !== null}
-                onClick={() => doExport("record")}
-              >
-                {exportLabel(busy, "record", t)}
-                <span>JPEG · 3000 × 2000</span>
-              </button>
+              {EXPORT_BUTTONS.map(({ kind, format }) => (
+                <button
+                  key={kind}
+                  type="button"
+                  className="export"
+                  aria-busy={busy === kind}
+                  disabled={busy !== null}
+                  onClick={() => doExport(kind)}
+                >
+                  {exportLabel(busy, kind, t)}
+                  <span>{format}</span>
+                </button>
+              ))}
               <p className="hint">{t.streaming}</p>
             </fieldset>
           </div>
@@ -1112,7 +1083,7 @@ export const Maker = () => {
                 <p className="hint">
                   {t.labelHint(
                     t.corners[state.labelCorner],
-                    spotName(placedText(state), t)
+                    t.spot(...spotParts(placedText(state)))
                   )}
                 </p>
               )}

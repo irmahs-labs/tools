@@ -1,4 +1,4 @@
-import { hslToHex } from "./color";
+import { hslToHex, wrapHue } from "./color";
 import { COMBOS } from "./combos";
 import type { TextStyle } from "./fonts";
 import { CORNERS, LABEL_SIZES, TEXT_ALIGNS, TEXT_POSITIONS } from "./state";
@@ -11,7 +11,6 @@ const pick = <T>(items: readonly T[], random: Random): T =>
   items[Math.min(items.length - 1, Math.floor(random() * items.length))];
 
 const chance = (p: number, random: Random) => random() < p;
-const wrap = (h: number) => ((Math.round(h) % 360) + 360) % 360;
 
 /**
  * Text colours that read on most photos: cream, white and a near-black,
@@ -56,8 +55,8 @@ export const feelingLucky = (
   const colors = textColors(hues);
   const titleColor = pick(colors, random);
   const subtitleColor = chance(0.6, random) ? titleColor : pick(colors, random);
-  const playerHue = wrap(pick(hues, random) + (random() * 2 - 1) * 90);
-  const buttonHue = wrap(playerHue + pick([0, 0, 30, -30, 180], random));
+  const playerHue = wrapHue(pick(hues, random) + (random() * 2 - 1) * 90);
+  const buttonHue = wrapHue(playerHue + pick([0, 0, 30, -30, 180], random));
   // Any of the nine spots: one the label holds sends the text to the
   // middle of that side, as it would by hand.
   const textPosition = pick(TEXT_POSITIONS, random);

@@ -1,3 +1,4 @@
+import { wrapHue } from "./color";
 import type { SubtitleFont, TextStyle, TitleFont } from "./fonts";
 import { PAIRS, PLAIN } from "./fonts";
 
@@ -49,8 +50,6 @@ export interface Suggestion {
   buttonHue: number;
 }
 
-const wrap = (h: number) => ((Math.round(h) % 360) + 360) % 360;
-
 /**
  * Turns the photo's hues into combo suggestions, in the listed order. The
  * combos take turns starting from each photo hue, so the list mixes them.
@@ -62,9 +61,9 @@ export const suggestCombos = (photoHues: number[]): Suggestion[] => {
     const base = hues[i % hues.length];
 
     return {
-      buttonHue: wrap(base + combo.buttonShift),
+      buttonHue: wrapHue(base + combo.buttonShift),
       combo,
-      playerHue: wrap(base + combo.playerShift),
+      playerHue: wrapHue(base + combo.playerShift),
     };
   });
 };
