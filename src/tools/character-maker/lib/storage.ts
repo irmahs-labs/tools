@@ -57,11 +57,26 @@ export const saveCharacters = (characters: readonly Character[]) => {
   window.dispatchEvent(new Event(EVENT));
 };
 
-/** Saves one character over its last version, newest first. */
+/** The most characters this browser keeps: one has to go before a sixth. */
+export const MAX_SLOTS = 5;
+
+/**
+ * Saves one character over its last version, newest first. A new one only
+ * goes in while a slot is free: never over another character. Says whether
+ * it was saved.
+ */
 export const saveCharacter = (character: Character, now = new Date()) => {
-  const others = loadCharacters().filter((entry) => entry.id !== character.id);
+  const all = loadCharacters();
+  const others = all.filter((entry) => entry.id !== character.id);
+  const isNew = others.length === all.length;
+
+  if (isNew && others.length >= MAX_SLOTS) {
+    return false;
+  }
 
   saveCharacters([{ ...character, updatedAt: now.toISOString() }, ...others]);
+
+  return true;
 };
 
 export const deleteCharacter = (id: string) =>

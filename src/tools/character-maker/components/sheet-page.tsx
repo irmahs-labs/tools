@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { useCopy } from "../../../lib/language";
 import { useCharacters } from "../lib/storage";
 import { COPY } from "./copy";
@@ -8,6 +10,16 @@ import { Topbar } from "./topbar";
 export const SheetPage = ({ id }: { id: string }) => {
   const t = useCopy(COPY);
   const character = useCharacters().find((entry) => entry.id === id);
+  const found = Boolean(character);
+
+  // Export as PDF opens the sheet with ?print: the print dialog, where it
+  // saves as a PDF, once
+  useEffect(() => {
+    if (found && new URLSearchParams(window.location.search).has("print")) {
+      window.history.replaceState(null, "", window.location.pathname);
+      window.print();
+    }
+  }, [found]);
 
   return (
     <div className="page dotted">

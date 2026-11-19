@@ -1766,6 +1766,43 @@ fieldset.segmented {
   flex-wrap: wrap;
   gap: 8px;
 }
+/* Deleting a character asks first, and offers a copy */
+.cm-dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 20px;
+  border: 2px solid var(--outline);
+  border-radius: 20px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: var(--shadow-hard);
+}
+.cm-dialog::backdrop {
+  background: rgb(15 20 17 / 55%);
+}
+.cm-dialog h2 {
+  margin: 0 0 8px;
+  font-family: var(--display);
+}
+.cm-dialog p {
+  margin: 0 0 12px;
+}
+.cm-dialog-end {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.pill.danger {
+  background: var(--danger);
+  color: #0f1411;
+}
+.cm-message:empty {
+  display: none;
+}
+.character-packs {
+  font-size: 12px;
+}
 .cm-home .center {
   flex: 1 1 100%;
   text-align: center;

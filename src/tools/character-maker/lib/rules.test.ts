@@ -19,6 +19,7 @@ import { CLASSES } from "./srd/classes";
 import { WEAPONS, armorById, weaponById } from "./srd/equipment";
 import { BACKGROUNDS, BACKGROUND_GEAR, SPECIES } from "./srd/origins";
 import { SPELLS } from "./srd/spells";
+import { SUBCLASSES } from "./srd/subclasses";
 
 const make = (changes: Partial<Character>): Character => ({
   ...newCharacter("test", new Date("2026-11-16T12:00:00Z")),
@@ -38,6 +39,18 @@ const scores = (
 });
 
 describe("the SRD data", () => {
+  it("has one subclass per class, named in both languages", () => {
+    expect(new Set(SUBCLASSES.map((entry) => entry.classId))).toEqual(
+      new Set(CLASSES.map((entry) => entry.id))
+    );
+    expect(SUBCLASSES).toHaveLength(CLASSES.length);
+
+    for (const subclass of SUBCLASSES) {
+      expect(subclass.name.fr).not.toBe("");
+      expect(subclass.features.length).toBeGreaterThan(0);
+    }
+  });
+
   it("has every cantrip and level 1 spell, named in both languages", () => {
     expect(SPELLS).toHaveLength(84);
     expect(new Set(SPELLS.map((spell) => spell.id)).size).toBe(SPELLS.length);
@@ -264,6 +277,22 @@ describe("what's left to choose", () => {
     expect(left.equipment).toBe(0);
   });
 
+  it("asks for a subclass once there is a class, and lists its features", () => {
+    const fighter = make({ classId: "fighter" });
+
+    expect(choicesLeft(fighter).class).toBe(1);
+
+    const champion = { ...fighter, subclass: "champion" };
+
+    expect(choicesLeft(champion).class).toBe(0);
+    expect(sheetOf(champion).features.map((f) => f.name.en)).toContain(
+      "Champion: Improved Critical"
+    );
+    // Another class's subclass doesn't count
+    expect(choicesLeft({ ...fighter, subclass: "thief" }).class).toBe(1);
+    expect(setClass(champion, "rogue").subclass).toBeNull();
+  });
+
   it("clears a class's own choices when the class changes", () => {
     const rogue = make({
       classId: "rogue",
@@ -290,6 +319,7 @@ describe("what's left to choose", () => {
       name: "Pip",
       scores: scores(15, 14, 13, 8, 10, 12),
       speciesId: "halfling",
+      subclass: "champion",
       weaponMasteries: ["greatsword", "flail", "javelin"],
     });
 
