@@ -41,6 +41,9 @@ export const hslToRgb = (h: number, s: number, l: number): RGB => {
   ];
 };
 
+/** A hue rounded to a whole degree and brought into 0–359. */
+export const wrapHue = (h: number) => ((Math.round(h) % 360) + 360) % 360;
+
 export const rgbToHex = ([r, g, b]: RGB): string =>
   `#${[r, g, b]
     .map((v) => v.toString(16).padStart(2, "0"))
