@@ -78,7 +78,6 @@ export const COPY = {
     hitPoints: "Hit Points",
     initiative: "Initiative",
     invocation: "Eldritch Invocation",
-    keenSenses: "Keen Senses skill",
     languages: "Languages",
     languagesPick: (n: number) => `Common, and ${n} more`,
     left: (n: number) => (n === 1 ? "1 left" : `${n} left`),
@@ -119,7 +118,6 @@ export const COPY = {
     size: "Size",
     skills: "Skills",
     skilledPick: "Choose 3 skills or tools",
-    skillful: "Skillful skill",
     slots: (n: number) => (n === 1 ? "1 level 1 slot" : `${n} level 1 slots`),
     slowed: "Speed −10 feet: Strength too low for this armor.",
     species: "Species",
@@ -225,7 +223,6 @@ export const COPY = {
     hitPoints: "Points de vie",
     initiative: "Initiative",
     invocation: "Manifestation occulte",
-    keenSenses: "Compétence des Sens aiguisés",
     languages: "Langues",
     languagesPick: (n: number) => `Le commun, et ${n} de plus`,
     left: (n: number) => (n === 1 ? "1 restant" : `${n} restants`),
@@ -266,7 +263,6 @@ export const COPY = {
     size: "Taille",
     skills: "Compétences",
     skilledPick: "Choisissez 3 compétences ou outils",
-    skillful: "Compétence de Compétent",
     slots: (n: number) =>
       n === 1
         ? "1 emplacement du 1er niveau"

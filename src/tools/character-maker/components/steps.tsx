@@ -20,6 +20,7 @@ import {
   initiateListOf,
   languageCount,
   masterableWeapons,
+  optionsFor,
   originSkills,
   pointsSpent,
   preparedCount,
@@ -30,8 +31,9 @@ import {
   spellById,
   spellCount,
   spellsOn,
+  subclassesFor,
 } from "../lib/rules";
-import { CLASSES, FIGHTING_STYLES, INVOCATIONS } from "../lib/srd/classes";
+import type { FeatSource } from "../lib/rules";
 import type { ClassInfo } from "../lib/srd/classes";
 import {
   ABILITIES,
@@ -56,16 +58,12 @@ import {
   OTHER_TOOLS,
 } from "../lib/srd/equipment";
 import {
-  BACKGROUNDS,
   FEATS,
   INITIATE_LISTS,
-  KEEN_SENSES,
   ORIGIN_FEATS,
   SIZE_NAMES,
-  SPECIES,
 } from "../lib/srd/origins";
 import type { InitiateList, OriginFeat } from "../lib/srd/origins";
-import { subclassesOf } from "../lib/srd/subclasses";
 import { distance } from "../lib/words";
 import { Choices, Left } from "./choices";
 import { COPY } from "./copy";
@@ -100,7 +98,7 @@ export const ClassStep = ({ character, update }: StepProps) => {
         <legend>{t.class}</legend>
         <Choices
           legend={<span className="visually-hidden">{t.class}</span>}
-          options={CLASSES.map((entry) => ({
+          options={optionsFor(character).classes.map((entry) => ({
             detail: `d${entry.hitDie} · ${entry.primary.map((ability) => ABILITY_SHORT[ability][language]).join(" / ")}`,
             id: entry.id,
             label: entry.name[language],
@@ -117,7 +115,7 @@ export const ClassStep = ({ character, update }: StepProps) => {
             legend={t.subclassPick}
             hint={t.subclassHint}
             wide
-            options={subclassesOf(info.id).map((entry) => ({
+            options={subclassesFor(character).map((entry) => ({
               detail: entry.features
                 .map((feature) => feature.name[language])
                 .join(" · "),
@@ -201,7 +199,7 @@ const FeatPicker = ({
   update,
   source,
   feat,
-}: StepProps & { source: "background" | "human"; feat: OriginFeat }) => {
+}: StepProps & { source: FeatSource; feat: OriginFeat }) => {
   const language = useLanguage();
   const t = COPY[language];
   const picks = character.feats[source];
@@ -269,7 +267,7 @@ const FeatPicker = ({
         <strong>{FEATS["magic-initiate"].name[language]}</strong>
         {list ? ` · ${LIST_NAMES[list][language]}` : ""}
       </p>
-      {source === "human" ? (
+      {source === "species" ? (
         <Choices
           legend={t.list}
           // Magic Initiate again must draw on another list than the background's
@@ -307,7 +305,7 @@ const FeatPicker = ({
                 <Left count={2 - initiate.cantrips.length} words={t.left} />
               </>
             }
-            options={spellsOn(list, 0).map((spell) => ({
+            options={spellsOn(character, list, 0).map((spell) => ({
               disabled: initiate.cantrips.length >= 2,
               id: spell.id,
               label: spell.name[language],
@@ -325,7 +323,7 @@ const FeatPicker = ({
           />
           <Choices
             legend={language === "fr" ? "Sort du 1er niveau" : "Level 1 spell"}
-            options={spellsOn(list, 1).map((spell) => ({
+            options={spellsOn(character, list, 1).map((spell) => ({
               id: spell.id,
               label: spell.name[language],
             }))}
@@ -353,7 +351,7 @@ const BackgroundPanel = ({ character, update }: StepProps) => {
       <legend>{t.background}</legend>
       <Choices
         legend={<span className="visually-hidden">{t.background}</span>}
-        options={BACKGROUNDS.map((entry) => ({
+        options={optionsFor(character).backgrounds.map((entry) => ({
           detail: `${entry.abilities.map((ability) => ABILITY_SHORT[ability][language]).join(", ")} · ${FEATS[entry.feat].name[language]}`,
           id: entry.id,
           label: entry.name[language],
@@ -466,7 +464,7 @@ const SpeciesPanel = ({ character, update }: StepProps) => {
       <legend>{t.species}</legend>
       <Choices
         legend={<span className="visually-hidden">{t.species}</span>}
-        options={SPECIES.map((entry) => ({
+        options={optionsFor(character).species.map((entry) => ({
           detail: `${entry.sizes.map((size) => SIZE_NAMES[size][language]).join(" / ")} · ${distance(entry.speed)[language]}`,
           id: entry.id,
           label: entry.name[language],
@@ -518,30 +516,20 @@ const SpeciesPanel = ({ character, update }: StepProps) => {
           onPick={(id) => update((c) => ({ ...c, castingAbility: id }))}
         />
       ) : null}
-      {species?.id === "elf" ? (
+      {species?.skillChoice ? (
         <Choices
-          legend={t.keenSenses}
-          options={KEEN_SENSES.map((skill) => ({
-            disabled: taken.has(skill) && character.keenSense !== skill,
+          legend={species.skillChoice.label[language]}
+          options={species.skillChoice.from.map((skill) => ({
+            disabled: taken.has(skill) && character.speciesSkill !== skill,
             id: skill,
             label: SKILL_INFO[skill].name[language],
           }))}
-          chosen={character.keenSense ? [character.keenSense] : []}
-          onPick={(id) => update((c) => ({ ...c, keenSense: id }))}
+          chosen={character.speciesSkill ? [character.speciesSkill] : []}
+          onPick={(id) => update((c) => ({ ...c, speciesSkill: id }))}
         />
       ) : null}
-      {species?.id === "human" ? (
+      {species?.featChoice ? (
         <>
-          <Choices
-            legend={t.skillful}
-            options={SKILLS.map((skill) => ({
-              disabled: taken.has(skill) && character.humanSkill !== skill,
-              id: skill,
-              label: SKILL_INFO[skill].name[language],
-            }))}
-            chosen={character.humanSkill ? [character.humanSkill] : []}
-            onPick={(id) => update((c) => ({ ...c, humanSkill: id }))}
-          />
           <Choices
             legend={t.versatile}
             wide
@@ -550,13 +538,13 @@ const SpeciesPanel = ({ character, update }: StepProps) => {
               id: feat,
               label: FEATS[feat].name[language],
             }))}
-            chosen={character.humanFeat ? [character.humanFeat] : []}
+            chosen={character.speciesFeat ? [character.speciesFeat] : []}
             onPick={(id) =>
               update((c) => ({
                 ...c,
                 feats: {
                   ...c.feats,
-                  human: {
+                  species: {
                     initiate: {
                       ability: null,
                       cantrips: [],
@@ -566,16 +554,16 @@ const SpeciesPanel = ({ character, update }: StepProps) => {
                     skilled: [],
                   },
                 },
-                humanFeat: id,
+                speciesFeat: id,
               }))
             }
           />
-          {character.humanFeat ? (
+          {character.speciesFeat ? (
             <FeatPicker
               character={character}
               update={update}
-              source="human"
-              feat={character.humanFeat}
+              source="species"
+              feat={character.speciesFeat}
             />
           ) : null}
         </>
@@ -926,7 +914,7 @@ export const ProficienciesStep = ({ character, update }: StepProps) => {
           <Choices
             legend={t.order}
             wide
-            options={FIGHTING_STYLES.map((style) => ({
+            options={optionsFor(character).fightingStyles.map((style) => ({
               detail: style.text[language],
               id: style.id,
               label: style.name[language],
@@ -943,7 +931,7 @@ export const ProficienciesStep = ({ character, update }: StepProps) => {
           <Choices
             legend={t.order}
             wide
-            options={INVOCATIONS.map((invocation) => ({
+            options={optionsFor(character).invocations.map((invocation) => ({
               detail: invocation.text[language],
               id: invocation.id,
               label: invocation.name[language],
@@ -1002,7 +990,7 @@ export const SpellsStep = ({ character, update }: StepProps) => {
               />
             </>
           }
-          options={spellsOn(info.id, 0).map((spell) => ({
+          options={spellsOn(character, info.id, 0).map((spell) => ({
             disabled:
               fromSpecies.includes(spell.id) ||
               character.cantrips.length >= cantrips,
@@ -1025,7 +1013,7 @@ export const SpellsStep = ({ character, update }: StepProps) => {
             <Left count={spells - character.spells.length} words={t.left} />
           </>
         }
-        options={spellsOn(info.id, 1).map((spell) => ({
+        options={spellsOn(character, info.id, 1).map((spell) => ({
           detail: spell.ritual ? t.ritual : undefined,
           disabled:
             casting.always?.includes(spell.id) ||

@@ -1,6 +1,5 @@
 import { w } from "../words";
 import type { Words } from "../words";
-import type { ClassId } from "./classes";
 import type { Trait } from "./origins";
 
 /**
@@ -11,7 +10,8 @@ import type { Trait } from "./origins";
  */
 export interface Subclass {
   id: string;
-  classId: ClassId;
+  /** The class it belongs to, by id. */
+  classId: string;
   name: Words;
   features: readonly Trait[];
 }
@@ -265,7 +265,3 @@ export const SUBCLASSES: readonly Subclass[] = [
     name: w("Evoker", "Évocateur"),
   },
 ];
-
-/** The subclasses a class can take. */
-export const subclassesOf = (classId: ClassId): Subclass[] =>
-  SUBCLASSES.filter((entry) => entry.classId === classId);

@@ -1,10 +1,5 @@
 import type { Character, FeatPicks } from "./character";
-import {
-  CLASSES,
-  FIGHTING_STYLES,
-  INVOCATIONS,
-  classById,
-} from "./srd/classes";
+import { PACKS, contentOf } from "./packs";
 import type { ClassInfo, Order } from "./srd/classes";
 import {
   ABILITIES,
@@ -21,7 +16,7 @@ import {
 import type { Ability, Skill } from "./srd/core";
 import { WEAPONS, armorById, weaponById } from "./srd/equipment";
 import type { Weapon } from "./srd/equipment";
-import { BACKGROUNDS, BACKGROUND_GEAR, FEATS, SPECIES } from "./srd/origins";
+import { FEATS } from "./srd/origins";
 import type {
   Background,
   InitiateList,
@@ -30,27 +25,30 @@ import type {
   Trait,
   Variant,
 } from "./srd/origins";
-import { SPELLS } from "./srd/spells";
 import type { Spell } from "./srd/spells";
-import { SUBCLASSES } from "./srd/subclasses";
 import type { Subclass } from "./srd/subclasses";
 
 /**
- * The rules of SRD 5.2.1's "Character Creation" for a level 1 character, as
- * plain functions: what a character's choices add up to on the sheet, and
- * which choices are still to make.
+ * The rules of "Character Creation" for a level 1 character, as plain
+ * functions: what a character's choices add up to on the sheet, and which
+ * choices are still to make. What there is to choose from comes from the
+ * character's rule packs (packs.ts).
  */
 
 // ── Looking things up ──
 
+/** What the character's packs hold: the classes, species, spells… to choose from. */
+export const optionsFor = (c: Character) => contentOf(c.packs);
+
 export const classOf = (c: Character): ClassInfo | null =>
-  c.classId ? classById(c.classId) : null;
+  optionsFor(c).classes.find((entry) => entry.id === c.classId) ?? null;
 
 export const backgroundOf = (c: Character): Background | null =>
-  BACKGROUNDS.find((entry) => entry.id === c.backgroundId) ?? null;
+  optionsFor(c).backgrounds.find((entry) => entry.id === c.backgroundId) ??
+  null;
 
 export const speciesOf = (c: Character): Species | null =>
-  SPECIES.find((entry) => entry.id === c.speciesId) ?? null;
+  optionsFor(c).species.find((entry) => entry.id === c.speciesId) ?? null;
 
 export const variantOf = (c: Character): Variant | null =>
   speciesOf(c)?.variants?.options.find((entry) => entry.id === c.variant) ??
@@ -58,19 +56,28 @@ export const variantOf = (c: Character): Variant | null =>
 
 /** The subclass picked, if it belongs to the class picked. */
 export const subclassOf = (c: Character): Subclass | null =>
-  SUBCLASSES.find(
+  optionsFor(c).subclasses.find(
     (entry) => entry.id === c.subclass && entry.classId === c.classId
   ) ?? null;
+
+/** The subclasses the character's class can take. */
+export const subclassesFor = (c: Character): Subclass[] =>
+  optionsFor(c).subclasses.filter((entry) => entry.classId === c.classId);
 
 export const orderOf = (c: Character): Order | null =>
   classOf(c)?.order?.options.find((entry) => entry.id === c.order) ?? null;
 
+/** A spell from any pack: a spell's id names it in every pack. */
 export const spellById = (id: string): Spell | undefined =>
-  SPELLS.find((spell) => spell.id === id);
+  PACKS.flatMap((pack) => pack.content.spells).find((spell) => spell.id === id);
 
-/** The cantrips or level 1 spells on a class's (or Magic Initiate's) list. */
-export const spellsOn = (list: ClassInfo["id"] | InitiateList, level: 0 | 1) =>
-  SPELLS.filter(
+/** The cantrips or level 1 spells in the character's packs on a class's (or Magic Initiate's) list. */
+export const spellsOn = (
+  c: Character,
+  list: ClassInfo["id"] | InitiateList,
+  level: 0 | 1
+) =>
+  optionsFor(c).spells.filter(
     (spell) => spell.level === level && spell.classes.includes(list)
   );
 
@@ -170,19 +177,22 @@ export const finalScores = (c: Character): Record<Ability, number> => {
 
 // ── Origin feats ──
 
-/** The character's Origin feats: their background's, and a Human's Versatile one. */
+/** Where an Origin feat comes from: the background, or a species that lets you pick one. */
+export type FeatSource = "background" | "species";
+
+/** The character's Origin feats: their background's, and the one their species lets them pick. */
 export const originFeats = (
   c: Character
-): { source: "background" | "human"; feat: OriginFeat }[] => {
-  const feats: { source: "background" | "human"; feat: OriginFeat }[] = [];
+): { source: FeatSource; feat: OriginFeat }[] => {
+  const feats: { source: FeatSource; feat: OriginFeat }[] = [];
   const background = backgroundOf(c);
 
   if (background) {
     feats.push({ feat: background.feat, source: "background" });
   }
 
-  if (c.speciesId === "human" && c.humanFeat) {
-    feats.push({ feat: c.humanFeat, source: "human" });
+  if (speciesOf(c)?.featChoice && c.speciesFeat) {
+    feats.push({ feat: c.speciesFeat, source: "species" });
   }
 
   return feats;
@@ -191,11 +201,11 @@ export const originFeats = (
 /** The list a Magic Initiate draws on: the background's own, or the one picked. */
 export const initiateListOf = (
   c: Character,
-  source: "background" | "human"
+  source: FeatSource
 ): InitiateList | null =>
   source === "background"
     ? (backgroundOf(c)?.initiateList ?? null)
-    : c.feats.human.initiate.list;
+    : c.feats.species.initiate.list;
 
 /** A Skilled pick that is a skill, or null when it's a tool. */
 const skillNamed = (id: string): Skill | null =>
@@ -221,12 +231,10 @@ export const originSkills = (c: Character): Skill[] => {
     skills.add(skill);
   }
 
-  if (c.speciesId === "human" && c.humanSkill) {
-    skills.add(c.humanSkill);
-  }
+  const choice = speciesOf(c)?.skillChoice;
 
-  if (c.speciesId === "elf" && c.keenSense) {
-    skills.add(c.keenSense);
+  if (choice && c.speciesSkill && choice.from.includes(c.speciesSkill)) {
+    skills.add(c.speciesSkill);
   }
 
   for (const { feat, source } of originFeats(c)) {
@@ -306,7 +314,7 @@ export const masterableWeapons = (c: Character): Weapon[] =>
   WEAPONS.filter(
     (weapon) =>
       proficientWith(c, weapon) &&
-      (c.classId !== "barbarian" || weapon.kind === "melee")
+      (!classOf(c)?.masteryMeleeOnly || weapon.kind === "melee")
   );
 
 // ── Equipment ──
@@ -318,9 +326,7 @@ export const gearOf = (c: Character): string[] => {
 
   return [
     ...(info?.packages[c.classPackage]?.gear ?? []),
-    ...(background && c.backgroundPackage === "a"
-      ? BACKGROUND_GEAR[background.id]
-      : []),
+    ...(background && c.backgroundPackage === "a" ? background.gear : []),
   ];
 };
 
@@ -388,8 +394,6 @@ export const formatBonus = signed;
 const damageOf = (dice: string, mod: number) =>
   mod === 0 ? dice : `${dice}${mod > 0 ? "+" : "−"}${Math.abs(mod)}`;
 
-const MARTIAL_ARTS_DIE = "1d6";
-
 const isMonkWeapon = (weapon: Weapon) =>
   weapon.kind === "melee" &&
   (weapon.category === "simple" || Boolean(weapon.light));
@@ -431,7 +435,7 @@ const armorClassOf = (c: Character, mods: Record<Ability, number>) => {
     worn.push("shield");
   }
 
-  if (body && c.classId === "fighter" && c.fightingStyle === "defense") {
+  if (body && info?.fightingStyle && c.fightingStyle === "defense") {
     ac += 1;
   }
 
@@ -440,8 +444,9 @@ const armorClassOf = (c: Character, mods: Record<Ability, number>) => {
 
 const attacksOf = (c: Character, mods: Record<Ability, number>): Attack[] => {
   const ids = [...new Set(gearOf(c))];
-  const monk = c.classId === "monk";
-  const archery = c.classId === "fighter" && c.fightingStyle === "archery";
+  const info = classOf(c);
+  const martialArts = info?.martialArtsDie;
+  const archery = Boolean(info?.fightingStyle) && c.fightingStyle === "archery";
 
   const attacks = ids.flatMap((id): Attack[] => {
     const weapon = weaponById(id);
@@ -452,7 +457,7 @@ const attacksOf = (c: Character, mods: Record<Ability, number>): Attack[] => {
 
     let mod = weapon.kind === "ranged" ? mods.dex : mods.str;
 
-    if (weapon.finesse || (monk && isMonkWeapon(weapon))) {
+    if (weapon.finesse || (martialArts && isMonkWeapon(weapon))) {
       mod = Math.max(mods.str, mods.dex);
     }
 
@@ -460,8 +465,8 @@ const attacksOf = (c: Character, mods: Record<Ability, number>): Attack[] => {
 
     // Martial Arts: a d6 in place of a Monk weapon's smaller die
     const dice =
-      monk && isMonkWeapon(weapon) && weapon.damage === "1d4"
-        ? MARTIAL_ARTS_DIE
+      martialArts && isMonkWeapon(weapon) && weapon.damage === "1d4"
+        ? martialArts
         : weapon.damage;
 
     return [
@@ -479,12 +484,12 @@ const attacksOf = (c: Character, mods: Record<Ability, number>): Attack[] => {
   });
 
   // Everyone can make an Unarmed Strike, with their Proficiency Bonus
-  const unarmedMod = monk ? Math.max(mods.str, mods.dex) : mods.str;
+  const unarmedMod = martialArts ? Math.max(mods.str, mods.dex) : mods.str;
 
   attacks.push({
     bonus: unarmedMod + PROFICIENCY_BONUS,
-    damage: monk
-      ? damageOf(MARTIAL_ARTS_DIE, unarmedMod)
+    damage: martialArts
+      ? damageOf(martialArts, unarmedMod)
       : `${Math.max(0, 1 + mods.str)}`,
     mastered: false,
     type: "bludgeoning",
@@ -548,15 +553,16 @@ export const featuresOf = (c: Character): Trait[] => {
     });
   }
 
-  const style = FIGHTING_STYLES.find((entry) => entry.id === c.fightingStyle);
+  const { fightingStyles, invocations } = optionsFor(c);
+  const style = fightingStyles.find((entry) => entry.id === c.fightingStyle);
 
-  if (c.classId === "fighter" && style) {
+  if (info?.fightingStyle && style) {
     features.push(style);
   }
 
-  const invocation = INVOCATIONS.find((entry) => entry.id === c.invocation);
+  const invocation = invocations.find((entry) => entry.id === c.invocation);
 
-  if (c.classId === "warlock" && invocation) {
+  if (info?.invocations && invocation) {
     features.push(invocation);
   }
 
@@ -588,7 +594,7 @@ export const sheetOf = (c: Character): Sheet => {
     const isProficient = proficient.has(skill);
 
     const expertise =
-      c.classId === "rogue" && c.expertise.includes(skill) && isProficient;
+      Boolean(info?.expertise) && c.expertise.includes(skill) && isProficient;
 
     return {
       bonus:
@@ -619,7 +625,7 @@ export const sheetOf = (c: Character): Sheet => {
     hitDie: info?.hitDie ?? null,
     hitPoints: Math.max(
       1,
-      (info?.hitDie ?? 0) + mods.con + (c.speciesId === "dwarf" ? 1 : 0)
+      (info?.hitDie ?? 0) + mods.con + (species?.hitPointsPerLevel ?? 0)
     ),
     initiative: mods.dex + (alert ? PROFICIENCY_BONUS : 0),
     mods,
@@ -681,11 +687,7 @@ export const STEPS = [
 
 export type Step = (typeof STEPS)[number];
 
-const featPicksLeft = (
-  c: Character,
-  source: "background" | "human",
-  feat: OriginFeat
-) => {
+const featPicksLeft = (c: Character, source: FeatSource, feat: OriginFeat) => {
   const picks = c.feats[source];
 
   if (feat === "skilled") {
@@ -725,10 +727,8 @@ const speciesChoicesLeft = (c: Character): number => {
     (species.variants ? left(Boolean(variantOf(c))) : 0) +
     (species.sizes.length > 1 ? left(Boolean(c.size)) : 0) +
     (species.castingChoice ? left(Boolean(c.castingAbility)) : 0) +
-    (c.speciesId === "elf" ? left(Boolean(c.keenSense)) : 0) +
-    (c.speciesId === "human"
-      ? left(Boolean(c.humanSkill)) + left(Boolean(c.humanFeat))
-      : 0)
+    (species.skillChoice ? left(Boolean(c.speciesSkill)) : 0) +
+    (species.featChoice ? left(Boolean(c.speciesFeat)) : 0)
   );
 };
 
@@ -791,6 +791,3 @@ export const choicesLeft = (c: Character): Record<Step, number> => {
 /** Whether nothing is left to choose. */
 export const isComplete = (c: Character): boolean =>
   Object.values(choicesLeft(c)).every((count) => count === 0);
-
-/** All twelve classes, for the picker. */
-export const ALL_CLASSES = CLASSES;
