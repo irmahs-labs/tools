@@ -1,5 +1,6 @@
 import { w } from "../words";
 import type { Words } from "../words";
+import { SKILLS } from "./core";
 import type { Ability, Skill } from "./core";
 
 /**
@@ -73,10 +74,8 @@ export const INITIATE_LISTS: readonly InitiateList[] = [
 
 // ── Backgrounds ──
 
-export type BackgroundId = "acolyte" | "criminal" | "sage" | "soldier";
-
 export interface Background {
-  id: BackgroundId;
+  id: string;
   name: Words;
   /** The three abilities it can raise: +2 and +1, or +1 to all three. */
   abilities: readonly [Ability, Ability, Ability];
@@ -89,6 +88,8 @@ export interface Background {
   /** Package A; package B is always 50 GP. */
   equipment: Words;
   gold: number;
+  /** The weapons and armor in package A, by id, for the sheet's attacks. */
+  gear: readonly string[];
 }
 
 export const BACKGROUNDS: readonly Background[] = [
@@ -99,6 +100,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "Matériel de calligraphe, livre (de prières), symbole sacré, parchemin (10 feuilles), robe"
     ),
     feat: "magic-initiate",
+    gear: [],
     gold: 8,
     id: "acolyte",
     initiateList: "cleric",
@@ -113,6 +115,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "2 dagues, outils de voleur, 2 bourses, pied-de-biche, tenue de voyage"
     ),
     feat: "alert",
+    gear: ["dagger", "dagger"],
     gold: 16,
     id: "criminal",
     name: w("Criminal", "Criminel"),
@@ -126,6 +129,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "Bâton de combat, matériel de calligraphe, livre (d’histoire), parchemin (8 feuilles), robe"
     ),
     feat: "magic-initiate",
+    gear: ["quarterstaff"],
     gold: 8,
     id: "sage",
     initiateList: "wizard",
@@ -140,6 +144,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "Lance, arc court, 20 flèches, boîte de jeux (du même type que ci-dessus), trousse de soins, carquois, tenue de voyage"
     ),
     feat: "savage-attacker",
+    gear: ["spear", "shortbow"],
     gold: 14,
     id: "soldier",
     name: w("Soldier", "Soldat"),
@@ -148,26 +153,7 @@ export const BACKGROUNDS: readonly Background[] = [
   },
 ];
 
-/** The weapons and armor in each background's package A, for the sheet's attacks. */
-export const BACKGROUND_GEAR: Record<BackgroundId, readonly string[]> = {
-  acolyte: [],
-  criminal: ["dagger", "dagger"],
-  sage: ["quarterstaff"],
-  soldier: ["spear", "shortbow"],
-};
-
 // ── Species ──
-
-export type SpeciesId =
-  | "dragonborn"
-  | "dwarf"
-  | "elf"
-  | "gnome"
-  | "goliath"
-  | "halfling"
-  | "human"
-  | "orc"
-  | "tiefling";
 
 /** A choice inside a species: an elf's lineage, a dragonborn's ancestor. */
 export interface Variant {
@@ -184,7 +170,7 @@ export interface Variant {
 }
 
 export interface Species {
-  id: SpeciesId;
+  id: string;
   name: Words;
   /** Medium, Small, or the player's pick of either. */
   sizes: readonly ("medium" | "small")[];
@@ -197,6 +183,12 @@ export interface Species {
   castingChoice?: true;
   /** Cantrips every member knows, by spell id. */
   cantrips?: readonly string[];
+  /** A skill to pick: an Elf's Keen Senses, a Human's Skillful. */
+  skillChoice?: { label: Words; from: readonly Skill[] };
+  /** An Origin feat to pick: a Human's Versatile. */
+  featChoice?: true;
+  /** Hit Points added per level: a Dwarf's Dwarven Toughness. */
+  hitPointsPerLevel?: number;
 }
 
 const PB_LONG = w(
@@ -261,6 +253,7 @@ export const SPECIES: readonly Species[] = [
   },
   {
     darkvision: 120,
+    hitPointsPerLevel: 1,
     id: "dwarf",
     name: w("Dwarf", "Nain"),
     sizes: ["medium"],
@@ -294,6 +287,10 @@ export const SPECIES: readonly Species[] = [
     castingChoice: true,
     darkvision: 60,
     id: "elf",
+    skillChoice: {
+      from: ["insight", "perception", "survival"],
+      label: w("Keen Senses skill", "Compétence des Sens aiguisés"),
+    },
     name: w("Elf", "Elfe"),
     sizes: ["medium"],
     speed: 30,
@@ -502,8 +499,13 @@ export const SPECIES: readonly Species[] = [
     ],
   },
   {
+    featChoice: true,
     id: "human",
     name: w("Human", "Humain"),
+    skillChoice: {
+      from: SKILLS,
+      label: w("Skillful skill", "Compétence de Compétent"),
+    },
     sizes: ["medium", "small"],
     speed: 30,
     traits: [
@@ -608,10 +610,3 @@ export const SIZE_NAMES: Record<"medium" | "small", Words> = {
   medium: w("Medium", "Moyenne (M)"),
   small: w("Small", "Petite (P)"),
 };
-
-/** The Elf's Keen Senses: one of these. */
-export const KEEN_SENSES: readonly Skill[] = [
-  "insight",
-  "perception",
-  "survival",
-];

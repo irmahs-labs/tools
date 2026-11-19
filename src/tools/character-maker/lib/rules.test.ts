@@ -3,9 +3,13 @@ import { describe, expect, it } from "vitest";
 import { newCharacter } from "./character";
 import type { Character } from "./character";
 import { assignArrayScore, setClass, setScoreMethod } from "./edits";
+import { PACKS } from "./packs";
 import {
   cantripCount,
   choicesLeft,
+  classOf,
+  optionsFor,
+  proficientSkills,
   finalScores,
   isComplete,
   pointsSpent,
@@ -17,7 +21,7 @@ import {
 } from "./rules";
 import { CLASSES } from "./srd/classes";
 import { WEAPONS, armorById, weaponById } from "./srd/equipment";
-import { BACKGROUNDS, BACKGROUND_GEAR, SPECIES } from "./srd/origins";
+import { BACKGROUNDS, SPECIES } from "./srd/origins";
 import { SPELLS } from "./srd/spells";
 import { SUBCLASSES } from "./srd/subclasses";
 
@@ -36,6 +40,40 @@ const scores = (
 ) => ({
   base: { cha, con, dex, int, str, wis },
   method: "points" as const,
+});
+
+describe("rule packs", () => {
+  it("give every entry an id no other entry has", () => {
+    const all = PACKS.flatMap(({ content }) => [
+      ...content.classes.map((entry) => `class:${entry.id}`),
+      ...content.species.map((entry) => `species:${entry.id}`),
+      ...content.backgrounds.map((entry) => `background:${entry.id}`),
+      ...content.subclasses.map((entry) => `subclass:${entry.id}`),
+      ...content.spells.map((entry) => `spell:${entry.id}`),
+    ]);
+
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it("offer only what the character's packs hold", () => {
+    expect(optionsFor(make({ packs: [] })).classes).toEqual([]);
+    expect(classOf(make({ classId: "fighter", packs: [] }))).toBeNull();
+    expect(classOf(make({ classId: "fighter" }))?.id).toBe("fighter");
+  });
+
+  it("let an Elf and a Human pick their skill, and a Human a feat", () => {
+    const elf = make({ speciesId: "elf", speciesSkill: "survival" });
+
+    expect(proficientSkills(elf).has("survival")).toBe(true);
+    // A skill the species doesn't offer doesn't count
+    expect(
+      proficientSkills({ ...elf, speciesSkill: "arcana" }).has("arcana")
+    ).toBe(false);
+
+    const human = make({ speciesFeat: "alert", speciesId: "human" });
+
+    expect(sheetOf(human).initiative).toBe(sheetOf(make({})).initiative + 2);
+  });
 });
 
 describe("the SRD data", () => {
@@ -86,7 +124,7 @@ describe("the SRD data", () => {
     }
 
     for (const background of BACKGROUNDS) {
-      for (const id of BACKGROUND_GEAR[background.id]) {
+      for (const id of background.gear) {
         expect(weaponById(id), id).toBeDefined();
       }
     }

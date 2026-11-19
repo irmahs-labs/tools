@@ -63,7 +63,7 @@ export interface Spellcasting {
 }
 
 export interface ClassInfo {
-  id: ClassId;
+  id: string;
   name: Words;
   hitDie: number;
   primary: readonly Ability[];
@@ -94,6 +94,12 @@ export interface ClassInfo {
   invocations?: number;
   /** Languages the class teaches, and how many more of the standard ones. */
   languages?: { known: readonly ("druidic" | "thieves-cant")[]; extra: number };
+  /** Martial Arts: this die for Unarmed Strikes and Monk weapons, with Dexterity. */
+  martialArtsDie?: string;
+  /** Weapon Mastery for melee weapons only: the Barbarian's. */
+  masteryMeleeOnly?: true;
+  /** Where the rules suggest each Standard Array score goes. */
+  suggested?: Record<Ability, number>;
 }
 
 const trait = (name: Words, text: Words): Trait => ({ name, text });
@@ -132,7 +138,7 @@ const ALL_ARMOR = w(
   "Armures légères, intermédiaires et lourdes, boucliers"
 );
 
-export const CLASSES: readonly ClassInfo[] = [
+export const CLASSES: readonly (ClassInfo & { id: ClassId })[] = [
   {
     armor: { light: true, medium: true, shield: true },
     armorText: LIGHT_MEDIUM_SHIELD,
@@ -156,6 +162,7 @@ export const CLASSES: readonly ClassInfo[] = [
     hitDie: 12,
     id: "barbarian",
     martial: "all",
+    masteryMeleeOnly: true,
     name: w("Barbarian", "Barbare"),
     packages: [
       {
@@ -448,6 +455,7 @@ export const CLASSES: readonly ClassInfo[] = [
     hitDie: 8,
     id: "monk",
     martial: "light",
+    martialArtsDie: "1d6",
     name: w("Monk", "Moine"),
     packages: [
       {
@@ -821,16 +829,6 @@ export const CLASSES: readonly ClassInfo[] = [
     weapons: SIMPLE,
   },
 ];
-
-export const classById = (id: ClassId): ClassInfo => {
-  const found = CLASSES.find((entry) => entry.id === id);
-
-  if (!found) {
-    throw new Error(`There is no class called ${id}`);
-  }
-
-  return found;
-};
 
 /** The Standard Array by Class table: where the SRD suggests each score goes. */
 export const SUGGESTED_ARRAY: Record<ClassId, Record<Ability, number>> = {

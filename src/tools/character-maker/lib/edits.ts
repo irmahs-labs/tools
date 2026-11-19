@@ -1,10 +1,8 @@
 import type { Character } from "./character";
 import { BASE_SCORES } from "./character";
-import { SUGGESTED_ARRAY } from "./srd/classes";
-import type { ClassId } from "./srd/classes";
+import { contentOf } from "./packs";
 import { ABILITIES, STANDARD_ARRAY } from "./srd/core";
 import type { Ability } from "./srd/core";
-import type { BackgroundId, SpeciesId } from "./srd/origins";
 
 /**
  * Changes that reach past the one choice: picking another class clears the
@@ -17,7 +15,16 @@ const blankFeat = () => ({
   skilled: [],
 });
 
-export const setClass = (c: Character, classId: ClassId): Character =>
+/** The Standard Array where the rules suggest it for the class, or a sound one without. */
+const suggestedArray = (
+  c: Character,
+  classId: string | null
+): Record<Ability, number> => ({
+  ...(contentOf(c.packs).classes.find((info) => info.id === classId)
+    ?.suggested ?? { cha: 8, con: 13, dex: 14, int: 10, str: 15, wis: 12 }),
+});
+
+export const setClass = (c: Character, classId: string): Character =>
   c.classId === classId
     ? c
     : {
@@ -36,17 +43,14 @@ export const setClass = (c: Character, classId: ClassId): Character =>
         // The suggested Standard Array follows the class, until scores are touched
         scores:
           c.scores.method === "array"
-            ? { ...c.scores, base: { ...SUGGESTED_ARRAY[classId] } }
+            ? { ...c.scores, base: suggestedArray(c, classId) }
             : c.scores,
         spells: [],
         subclass: null,
         weaponMasteries: [],
       };
 
-export const setBackground = (
-  c: Character,
-  backgroundId: BackgroundId
-): Character =>
+export const setBackground = (c: Character, backgroundId: string): Character =>
   c.backgroundId === backgroundId
     ? c
     : {
@@ -57,18 +61,17 @@ export const setBackground = (
         feats: { ...c.feats, background: blankFeat() },
       };
 
-export const setSpecies = (c: Character, speciesId: SpeciesId): Character =>
+export const setSpecies = (c: Character, speciesId: string): Character =>
   c.speciesId === speciesId
     ? c
     : {
         ...c,
         castingAbility: null,
-        feats: { ...c.feats, human: blankFeat() },
-        humanFeat: null,
-        humanSkill: null,
-        keenSense: null,
+        feats: { ...c.feats, species: blankFeat() },
         size: null,
+        speciesFeat: null,
         speciesId,
+        speciesSkill: null,
         variant: null,
       };
 
@@ -84,9 +87,7 @@ export const setScoreMethod = (
   let base: Record<Ability, number> = { ...BASE_SCORES };
 
   if (method === "array") {
-    base = c.classId
-      ? { ...SUGGESTED_ARRAY[c.classId] }
-      : { cha: 8, con: 13, dex: 14, int: 10, str: 15, wis: 12 };
+    base = suggestedArray(c, c.classId);
   }
 
   if (method === "roll") {

@@ -4,7 +4,6 @@ import * as z from "zod/mini";
 import { catch as withFallback } from "zod/mini";
 
 import { DEFAULT_PACKS } from "./packs";
-import { CLASS_IDS } from "./srd/classes";
 import { ABILITIES, ALIGNMENTS, LANGUAGES, SKILLS } from "./srd/core";
 import type { Ability } from "./srd/core";
 import { INITIATE_LISTS, ORIGIN_FEATS } from "./srd/origins";
@@ -53,7 +52,24 @@ export const MAX_NAME = 60;
 
 export const MAX_NOTES = 2000;
 
-export const characterSchema = z.object({
+/** An entry of a rule pack, by id. */
+const entryId = z.string().check(z.maxLength(64));
+
+const blankInitiate = (): InitiateChoice => ({
+  ability: null,
+  cantrips: [],
+  list: null,
+  spell: null,
+});
+
+const blankFeat = (): FeatPicks => ({ initiate: blankInitiate(), skilled: [] });
+
+/**
+ * A character as saved. Saves from before rule packs named the Human's and
+ * the Elf's picks after them (humanFeat, humanSkill, keenSense, feats.human):
+ * they're read here and renamed below.
+ */
+const savedCharacter = z.object({
   alignment: z.nullable(z.enum(ALIGNMENTS)),
   /** Which of the background's three abilities gets +2 and +1, or all +1. */
   boost: z.object({
@@ -61,7 +77,7 @@ export const characterSchema = z.object({
     plus1: z.nullable(ability),
     plus2: z.nullable(ability),
   }),
-  backgroundId: z.nullable(z.enum(["acolyte", "criminal", "sage", "soldier"])),
+  backgroundId: z.nullable(entryId),
   /** The background's starting equipment: its package, or 50 GP. */
   backgroundPackage: z.enum(["a", "gold"]),
   /** The Soldier's Gaming Set. */
@@ -69,7 +85,7 @@ export const characterSchema = z.object({
   /** The spellcasting ability for an Elf's, Gnome's or Tiefling's spells. */
   castingAbility: z.nullable(ability),
   cantrips: z.array(z.string()),
-  classId: z.nullable(z.enum(CLASS_IDS)),
+  classId: z.nullable(entryId),
   /** Which starting equipment package of the class: 0 is A, the last is gold only. */
   classPackage: z.int(),
   classSkills: z.array(skill),
@@ -77,17 +93,18 @@ export const characterSchema = z.object({
   classTools: z.array(z.string()),
   createdAt: z.string(),
   expertise: z.array(skill),
-  /** The background's feat's picks, and the Human's Versatile feat's. */
-  feats: z.object({ background: featPicks, human: featPicks }),
+  /** The background's feat's picks, and those of the feat the species gives. */
+  feats: z.object({
+    background: featPicks,
+    human: z.optional(featPicks),
+    species: z.optional(featPicks),
+  }),
   fightingStyle: z.nullable(z.string()),
-  /** The Human's Versatile Origin feat. */
-  humanFeat: z.nullable(z.enum(ORIGIN_FEATS)),
-  /** The Human's Skillful skill. */
-  humanSkill: z.nullable(skill),
+  humanFeat: z.optional(z.nullable(z.enum(ORIGIN_FEATS))),
+  humanSkill: z.optional(z.nullable(skill)),
   id: z.string(),
   invocation: z.nullable(z.string()),
-  /** The Elf's Keen Senses skill. */
-  keenSense: z.nullable(skill),
+  keenSense: z.optional(z.nullable(skill)),
   languages: z.array(z.enum(LANGUAGES)),
   name: z.string().check(z.maxLength(MAX_NAME)),
   notes: z.string().check(z.maxLength(MAX_NOTES)),
@@ -104,19 +121,11 @@ export const characterSchema = z.object({
     method: z.enum(["array", "points", "roll"]),
   }),
   size: z.nullable(z.enum(["medium", "small"])),
-  speciesId: z.nullable(
-    z.enum([
-      "dragonborn",
-      "dwarf",
-      "elf",
-      "gnome",
-      "goliath",
-      "halfling",
-      "human",
-      "orc",
-      "tiefling",
-    ])
-  ),
+  speciesId: z.nullable(entryId),
+  /** The Origin feat the species lets them pick: a Human's Versatile. */
+  speciesFeat: z.optional(z.nullable(z.enum(ORIGIN_FEATS))),
+  /** The skill the species lets them pick: an Elf's Keen Senses, a Human's Skillful. */
+  speciesSkill: z.optional(z.nullable(skill)),
   /** The subclass, picked at the start; none in saves from before subclasses. */
   subclass: withFallback(z.nullable(z.string().check(z.maxLength(64))), null),
   /** The level 1 spells prepared, or for a Wizard, in the spellbook. */
@@ -129,16 +138,21 @@ export const characterSchema = z.object({
   weaponMasteries: z.array(z.string()),
 });
 
-export type Character = z.infer<typeof characterSchema>;
+/** A character as the maker reads one: a save, its old names renamed. */
+export const characterSchema = z.pipe(
+  savedCharacter,
+  z.transform(({ feats, humanFeat, humanSkill, keenSense, ...character }) => ({
+    ...character,
+    feats: {
+      background: feats.background,
+      species: feats.species ?? feats.human ?? blankFeat(),
+    },
+    speciesFeat: character.speciesFeat ?? humanFeat ?? null,
+    speciesSkill: character.speciesSkill ?? keenSense ?? humanSkill ?? null,
+  }))
+);
 
-const blankInitiate = (): InitiateChoice => ({
-  ability: null,
-  cantrips: [],
-  list: null,
-  spell: null,
-});
-
-const blankFeat = (): FeatPicks => ({ initiate: blankInitiate(), skilled: [] });
+export type Character = z.output<typeof characterSchema>;
 
 /** Every score at 8, where point buy starts. */
 export const BASE_SCORES: Record<Ability, number> = {
@@ -168,13 +182,10 @@ export const newCharacter = (
   classTools: [],
   createdAt: now.toISOString(),
   expertise: [],
-  feats: { background: blankFeat(), human: blankFeat() },
+  feats: { background: blankFeat(), species: blankFeat() },
   fightingStyle: null,
-  humanFeat: null,
-  humanSkill: null,
   id,
   invocation: null,
-  keenSense: null,
   languages: [],
   name: "",
   notes: "",
@@ -183,7 +194,9 @@ export const newCharacter = (
   prepared: [],
   scores: { base: { ...BASE_SCORES }, method: "points" },
   size: null,
+  speciesFeat: null,
   speciesId: null,
+  speciesSkill: null,
   spells: [],
   subclass: null,
   updatedAt: now.toISOString(),

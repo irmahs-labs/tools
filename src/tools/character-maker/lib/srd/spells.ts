@@ -1,12 +1,12 @@
 import type { Words } from "../words";
-import type { ClassId } from "./classes";
 
 /** A cantrip (level 0) or level 1 spell, and the class lists it is on. */
 export interface Spell {
   id: string;
   name: Words;
   level: 0 | 1;
-  classes: readonly ClassId[];
+  /** The classes, by id, whose list it is on. */
+  classes: readonly string[];
   /** It has the Ritual tag. */
   ritual?: true;
 }

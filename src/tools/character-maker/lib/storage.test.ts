@@ -68,4 +68,33 @@ describe("characters in this browser", () => {
       subclass: null,
     });
   });
+
+  it("renames a Human's and an Elf's picks in saves from before packs", () => {
+    const {
+      feats,
+      speciesFeat: _feat,
+      speciesSkill: _skill,
+      ...character
+    } = newCharacter("old");
+
+    const old = {
+      ...character,
+      feats: { background: feats.background, human: feats.species },
+      humanFeat: "skilled",
+      humanSkill: "arcana",
+      keenSense: null,
+      speciesId: "human",
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([old]));
+
+    const [read] = loadCharacters();
+
+    expect(read).toMatchObject({
+      speciesFeat: "skilled",
+      speciesSkill: "arcana",
+    });
+    expect(read?.feats.species).toEqual(feats.species);
+    expect(read).not.toHaveProperty("humanSkill");
+  });
 });
