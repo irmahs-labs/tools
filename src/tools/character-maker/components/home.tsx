@@ -144,33 +144,31 @@ const DeleteDialog = ({
         <>
           <h2 id="cm-delete-title">{t.deleteTitle(name)}</h2>
           <p>{t.deleteLead}</p>
-          <div className="character-actions">
+          <div className="cm-dialog-buttons">
             <button
               type="button"
-              className="pill"
+              className="pill small"
               onClick={() => exportPdf(character.id)}
             >
               {t.exportPdf}
             </button>
             <button
               type="button"
-              className="pill"
+              className="pill small"
               onClick={() => downloadCharacter(character)}
             >
               {t.exportJson}
             </button>
-          </div>
-          <div className="cm-dialog-end">
             <button
               type="button"
-              className="pill"
+              className="pill small"
               onClick={() => dialog.current?.close()}
             >
               {t.cancel}
             </button>
             <button
               type="button"
-              className="pill danger"
+              className="pill small danger"
               onClick={() => {
                 deleteCharacter(character.id);
                 dialog.current?.close();

@@ -1786,20 +1786,16 @@ fieldset.segmented {
 .cm-dialog p {
   margin: 0 0 12px;
 }
-.cm-dialog .character-actions {
-  justify-content: center;
-}
-/* Every button in it the same size, two to a row */
-.cm-dialog .pill {
-  width: 170px;
-  max-width: calc(50% - 4px);
-}
-.cm-dialog-end {
-  margin-top: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+/* Its four buttons small, two to a row, each column as wide as the widest */
+.cm-dialog-buttons {
+  margin: 16px auto 0;
+  width: fit-content;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+.cm-dialog-buttons .pill {
+  align-self: stretch;
 }
 .pill.danger {
   background: var(--danger);
