@@ -33,7 +33,7 @@ export const COPY = {
     damage: "Damage",
     cancel: "keep it",
     delete: "delete",
-    deleteForGood: "delete for good",
+    deleteForGood: "delete",
     deleteLead:
       "It can't be undone. Keep a copy first: the sheet as a PDF, or the character file to import again later.",
     deleteTitle: (name: string) => `Delete ${name}?`,
@@ -179,7 +179,7 @@ export const COPY = {
     damage: "Dégâts",
     cancel: "le garder",
     delete: "supprimer",
-    deleteForGood: "supprimer pour de bon",
+    deleteForGood: "supprimer",
     deleteLead:
       "C’est définitif. Gardez-en une copie d’abord : la fiche en PDF, ou le fichier du personnage pour l’importer plus tard.",
     deleteTitle: (name: string) => `Supprimer ${name} ?`,
