@@ -147,14 +147,14 @@ const DeleteDialog = ({
           <div className="character-actions">
             <button
               type="button"
-              className="pill small"
+              className="pill"
               onClick={() => exportPdf(character.id)}
             >
               {t.exportPdf}
             </button>
             <button
               type="button"
-              className="pill small"
+              className="pill"
               onClick={() => downloadCharacter(character)}
             >
               {t.exportJson}

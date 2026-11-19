@@ -1789,6 +1789,11 @@ fieldset.segmented {
 .cm-dialog .character-actions {
   justify-content: center;
 }
+/* Every button in it the same size, two to a row */
+.cm-dialog .pill {
+  width: 170px;
+  max-width: calc(50% - 4px);
+}
 .cm-dialog-end {
   margin-top: 16px;
   display: flex;
