@@ -8,6 +8,7 @@ import { Maker } from "./tools/album-cover-maker/components/maker";
 import { ALBUM_HOME, ALBUM_MAKER } from "./tools/album-cover-maker/paths";
 import { Editor } from "./tools/character-maker/components/editor";
 import { Home as CharacterHome } from "./tools/character-maker/components/home";
+import { PackEditor } from "./tools/character-maker/components/pack-editor";
 import { SheetPage } from "./tools/character-maker/components/sheet-page";
 import { characterPageAt } from "./tools/character-maker/paths";
 
@@ -17,7 +18,8 @@ type Page =
   | "maker"
   | "characters"
   | "character"
-  | "character-sheet";
+  | "character-sheet"
+  | "character-pack";
 
 /** The page at `path`; any address Tools doesn't know is the hub. */
 export const pageAt = (path: string): Page => {
@@ -35,6 +37,10 @@ export const pageAt = (path: string): Page => {
 
   if (character?.page === "home") {
     return "characters";
+  }
+
+  if (character?.page === "pack") {
+    return "character-pack";
   }
 
   if (character) {
@@ -64,10 +70,12 @@ export const App = () => {
     const characters = `Character Maker ${by} Irma HS`;
     const sheet = french ? "Fiche de personnage" : "Character sheet";
     const editing = french ? "Créer un personnage" : "Make a character";
+    const pack = french ? "Votre contenu" : "Your own content";
 
     const titles: Record<Page, string> = {
       album,
       character: `${editing} · ${characters}`,
+      "character-pack": `${pack} · ${characters}`,
       "character-sheet": `${sheet} · ${characters}`,
       characters,
       hub: `Tools ${by} Irma HS`,
@@ -87,6 +95,10 @@ export const App = () => {
 
   if (page === "character") {
     return <Editor id={characterIdAt(path)} />;
+  }
+
+  if (page === "character-pack") {
+    return <PackEditor id={characterIdAt(path)} />;
   }
 
   if (page === "character-sheet") {

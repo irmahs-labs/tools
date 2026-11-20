@@ -10,7 +10,8 @@ import {
   setSpecies,
   toggleIn,
 } from "../lib/edits";
-import { PACKS } from "../lib/packs";
+import { useOwnPacks } from "../lib/own-packs";
+import { allPacks } from "../lib/packs";
 import {
   backgroundOf,
   boostsOf,
@@ -109,6 +110,9 @@ const PackPicker = ({ character, update }: StepProps) => {
   const language = useLanguage();
   const t = COPY[language];
 
+  // The player's own packs are offered too, as they are saved
+  useOwnPacks();
+
   return (
     <fieldset className="panel">
       <legend>{t.packs}</legend>
@@ -116,7 +120,7 @@ const PackPicker = ({ character, update }: StepProps) => {
         legend={<span className="visually-hidden">{t.packs}</span>}
         hint={t.packsHint}
         wide
-        options={PACKS.map((pack) => ({
+        options={allPacks().map((pack) => ({
           // At least one: the last one picked stays
           disabled:
             character.packs.length === 1 && character.packs.includes(pack.id),

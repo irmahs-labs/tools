@@ -2,22 +2,26 @@ import type { ReactNode } from "react";
 
 import { ToolHeader } from "../../../components/tool-header";
 import { useCopy } from "../../../lib/language";
-import { CHARACTER_HOME, characterPath, sheetPath } from "../paths";
+import { CHARACTER_HOME, characterPath, packPath, sheetPath } from "../paths";
 import { COPY } from "./copy";
 
 /**
  * Character Maker's header, the one every tool has: its tabs are your
- * characters, and with one open, its editor and its sheet. `children` are
+ * characters, and with one open, its editor and its sheet, or the pack
+ * open. `children` are
  * the page's own buttons, like printing the sheet.
  */
 export const Topbar = ({
   character,
+  pack,
   page,
   children,
 }: {
   /** The character open, if any. */
   character?: string;
-  page: "home" | "edit" | "sheet";
+  /** The player's own pack open, if any. */
+  pack?: { id: string; name: string };
+  page: "home" | "edit" | "sheet" | "pack";
   children?: ReactNode;
 }) => {
   const t = useCopy(COPY);
@@ -35,6 +39,15 @@ export const Topbar = ({
             current: page === "sheet",
             href: sheetPath(character),
             label: t.sheetTab,
+          },
+        ]
+      : []),
+    ...(pack
+      ? [
+          {
+            current: page === "pack",
+            href: packPath(pack.id),
+            label: pack.name,
           },
         ]
       : []),

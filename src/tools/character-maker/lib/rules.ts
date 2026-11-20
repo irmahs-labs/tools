@@ -1,5 +1,5 @@
 import type { Character, FeatPicks } from "./character";
-import { PACKS, contentOf } from "./packs";
+import { allPacks, contentOf } from "./packs";
 import type { ClassInfo, FightingStyle, Order } from "./srd/classes";
 import {
   ABILITIES,
@@ -77,7 +77,9 @@ export const orderOf = (c: Character): Order | null =>
 
 /** A spell from any pack: a spell's id names it in every pack. */
 export const spellById = (id: string): Spell | undefined =>
-  PACKS.flatMap((pack) => pack.content.spells).find((spell) => spell.id === id);
+  allPacks()
+    .flatMap((pack) => pack.content.spells)
+    .find((spell) => spell.id === id);
 
 /** The cantrips or level 1 spells in the character's packs on a class's (or Magic Initiate's) list. */
 export const spellsOn = (
