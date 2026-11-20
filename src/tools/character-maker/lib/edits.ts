@@ -69,9 +69,12 @@ export const setSpecies = (c: Character, speciesId: string): Character =>
         castingAbility: null,
         feats: { ...c.feats, species: blankFeat() },
         size: null,
+        speciesBoosts: [],
+        speciesCantrip: null,
         speciesFeat: null,
         speciesId,
-        speciesSkill: null,
+        speciesSkills: [],
+        speciesTool: null,
         variant: null,
       };
 

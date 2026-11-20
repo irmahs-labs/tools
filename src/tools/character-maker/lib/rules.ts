@@ -1,6 +1,6 @@
 import type { Character, FeatPicks } from "./character";
 import { PACKS, contentOf } from "./packs";
-import type { ClassInfo, Order } from "./srd/classes";
+import type { ClassInfo, FightingStyle, Order } from "./srd/classes";
 import {
   ABILITIES,
   EXTRA_LANGUAGES,
@@ -13,7 +13,7 @@ import {
   STANDARD_ARRAY,
   modifier,
 } from "./srd/core";
-import type { Ability, Skill } from "./srd/core";
+import type { Ability, Language, Skill } from "./srd/core";
 import { WEAPONS, armorById, weaponById } from "./srd/equipment";
 import type { Weapon } from "./srd/equipment";
 import { FEATS } from "./srd/origins";
@@ -63,6 +63,14 @@ export const subclassOf = (c: Character): Subclass | null =>
 /** The subclasses the character's class can take. */
 export const subclassesFor = (c: Character): Subclass[] =>
   optionsFor(c).subclasses.filter((entry) => entry.classId === c.classId);
+
+/** The Fighting Style picked, for a class that has one. */
+export const fightingStyleOf = (c: Character): FightingStyle | null =>
+  classOf(c)?.fightingStyle
+    ? (optionsFor(c).fightingStyles.find(
+        (entry) => entry.id === c.fightingStyle
+      ) ?? null)
+    : null;
 
 export const orderOf = (c: Character): Order | null =>
   classOf(c)?.order?.options.find((entry) => entry.id === c.order) ?? null;
@@ -117,7 +125,47 @@ export const rollScore = (roll: () => number): number =>
     .slice(0, 3)
     .reduce((sum, die) => sum + die, 0);
 
-/** What the background adds to each ability. */
+/** The +1s a species lets the player place that count: allowed ones, no more than it gives. */
+export const speciesBoostPicks = (c: Character): Ability[] => {
+  const choice = speciesOf(c)?.boostChoice;
+
+  if (!choice) {
+    return [];
+  }
+
+  return [...new Set(c.speciesBoosts)]
+    .filter((ability) => !choice.except.includes(ability))
+    .slice(0, choice.count);
+};
+
+/** What the background adds, from its three abilities (SRD 5.2.1). */
+const backgroundBoosts = (
+  c: Character,
+  abilities: readonly Ability[],
+  boosts: Record<Ability, number>
+) => {
+  if (c.boost.mode === "1-1-1") {
+    for (const ability of abilities) {
+      boosts[ability] += 1;
+    }
+
+    return;
+  }
+
+  if (c.boost.plus2 && abilities.includes(c.boost.plus2)) {
+    boosts[c.boost.plus2] += 2;
+  }
+
+  if (
+    c.boost.plus1 &&
+    c.boost.plus1 !== c.boost.plus2 &&
+    abilities.includes(c.boost.plus1)
+  ) {
+    boosts[c.boost.plus1] += 1;
+  }
+};
+
+/** What the background (SRD 5.2.1) or the species (SRD 5.1) adds to each ability. */
 export const boostsOf = (c: Character): Record<Ability, number> => {
   const boosts: Record<Ability, number> = {
     cha: 0,
@@ -128,30 +176,20 @@ export const boostsOf = (c: Character): Record<Ability, number> => {
     wis: 0,
   };
 
-  const background = backgroundOf(c);
+  const abilities = backgroundOf(c)?.abilities;
 
-  if (!background) {
-    return boosts;
+  if (abilities) {
+    backgroundBoosts(c, abilities, boosts);
   }
 
-  if (c.boost.mode === "1-1-1") {
-    for (const ability of background.abilities) {
-      boosts[ability] += 1;
-    }
+  const species = speciesOf(c);
 
-    return boosts;
+  for (const ability of ABILITIES) {
+    boosts[ability] += species?.boosts?.[ability] ?? 0;
   }
 
-  if (c.boost.plus2 && background.abilities.includes(c.boost.plus2)) {
-    boosts[c.boost.plus2] += 2;
-  }
-
-  if (
-    c.boost.plus1 &&
-    c.boost.plus1 !== c.boost.plus2 &&
-    background.abilities.includes(c.boost.plus1)
-  ) {
-    boosts[c.boost.plus1] += 1;
+  for (const ability of speciesBoostPicks(c)) {
+    boosts[ability] += 1;
   }
 
   return boosts;
@@ -187,7 +225,7 @@ export const originFeats = (
   const feats: { source: FeatSource; feat: OriginFeat }[] = [];
   const background = backgroundOf(c);
 
-  if (background) {
+  if (background?.feat) {
     feats.push({ feat: background.feat, source: "background" });
   }
 
@@ -223,6 +261,17 @@ const skilledTools = (picks: FeatPicks): string[] =>
 
 // ── Proficiencies ──
 
+/** The skills a species lets the player pick that count: on its list, no more than it gives. */
+export const speciesSkillPicks = (c: Character): Skill[] => {
+  const choice = speciesOf(c)?.skillChoice;
+
+  return choice
+    ? [...new Set(c.speciesSkills)]
+        .filter((skill) => choice.from.includes(skill))
+        .slice(0, choice.count ?? 1)
+    : [];
+};
+
 /** Skill proficiencies that don't come from the class's own picks. */
 export const originSkills = (c: Character): Skill[] => {
   const skills = new Set<Skill>();
@@ -231,10 +280,14 @@ export const originSkills = (c: Character): Skill[] => {
     skills.add(skill);
   }
 
-  const choice = speciesOf(c)?.skillChoice;
+  const species = speciesOf(c);
 
-  if (choice && c.speciesSkill && choice.from.includes(c.speciesSkill)) {
-    skills.add(c.speciesSkill);
+  for (const skill of species?.skills ?? []) {
+    skills.add(skill);
+  }
+
+  for (const skill of speciesSkillPicks(c)) {
+    skills.add(skill);
   }
 
   for (const { feat, source } of originFeats(c)) {
@@ -256,12 +309,22 @@ export const toolProficiencies = (c: Character): string[] => {
   const tools = new Set<string>();
   const background = backgroundOf(c);
 
-  if (background) {
+  if (background?.tool) {
     tools.add(
       background.tool === "gaming-set"
         ? (c.backgroundTool ?? "gaming-set")
         : background.tool
     );
+  }
+
+  const species = speciesOf(c);
+
+  for (const tool of species?.tools ?? []) {
+    tools.add(tool);
+  }
+
+  if (c.speciesTool && species?.toolChoice?.from.includes(c.speciesTool)) {
+    tools.add(c.speciesTool);
   }
 
   for (const tool of classOf(c)?.tools ?? []) {
@@ -286,6 +349,18 @@ export const toolProficiencies = (c: Character): string[] => {
 /** Whether the character can use a weapon with their Proficiency Bonus. */
 export const proficientWith = (c: Character, weapon: Weapon): boolean => {
   const info = classOf(c);
+
+  if (speciesOf(c)?.weapons?.includes(weapon.id)) {
+    return true;
+  }
+
+  // A class that names its weapons (SRD 5.1's Wizard, Rogue…) knows only those
+  if (info?.weaponList) {
+    return (
+      info.weaponList.includes(weapon.id) ||
+      (info.weaponList.includes("simple") && weapon.category === "simple")
+    );
+  }
 
   if (weapon.category === "simple") {
     return true;
@@ -435,8 +510,8 @@ const armorClassOf = (c: Character, mods: Record<Ability, number>) => {
     worn.push("shield");
   }
 
-  if (body && info?.fightingStyle && c.fightingStyle === "defense") {
-    ac += 1;
+  if (body) {
+    ac += fightingStyleOf(c)?.armoredAc ?? 0;
   }
 
   return { ac, slowedBy: body?.strength ?? 0, worn };
@@ -446,7 +521,7 @@ const attacksOf = (c: Character, mods: Record<Ability, number>): Attack[] => {
   const ids = [...new Set(gearOf(c))];
   const info = classOf(c);
   const martialArts = info?.martialArtsDie;
-  const archery = Boolean(info?.fightingStyle) && c.fightingStyle === "archery";
+  const rangedBonus = fightingStyleOf(c)?.rangedAttack ?? 0;
 
   const attacks = ids.flatMap((id): Attack[] => {
     const weapon = weaponById(id);
@@ -474,7 +549,7 @@ const attacksOf = (c: Character, mods: Record<Ability, number>): Attack[] => {
         bonus:
           mod +
           (proficient ? PROFICIENCY_BONUS : 0) +
-          (archery && weapon.kind === "ranged" ? 2 : 0),
+          (weapon.kind === "ranged" ? rangedBonus : 0),
         damage: damageOf(dice, mod),
         mastered: c.weaponMasteries.includes(weapon.id),
         type: weapon.type,
@@ -521,6 +596,12 @@ export const featuresOf = (c: Character): Trait[] => {
     });
   }
 
+  const backgroundTrait = backgroundOf(c)?.trait;
+
+  if (backgroundTrait) {
+    features.push(backgroundTrait);
+  }
+
   for (const { feat } of originFeats(c)) {
     features.push(FEATS[feat]);
   }
@@ -553,14 +634,15 @@ export const featuresOf = (c: Character): Trait[] => {
     });
   }
 
-  const { fightingStyles, invocations } = optionsFor(c);
-  const style = fightingStyles.find((entry) => entry.id === c.fightingStyle);
+  const style = fightingStyleOf(c);
 
-  if (info?.fightingStyle && style) {
+  if (style) {
     features.push(style);
   }
 
-  const invocation = invocations.find((entry) => entry.id === c.invocation);
+  const invocation = optionsFor(c).invocations.find(
+    (entry) => entry.id === c.invocation
+  );
 
   if (info?.invocations && invocation) {
     features.push(invocation);
@@ -654,24 +736,45 @@ export const cantripCount = (c: Character): number =>
   (classOf(c)?.spellcasting?.cantrips ?? 0) +
   (orderOf(c)?.extraCantrip ? 1 : 0);
 
-/** How many level 1 spells to pick: prepared ones, or the Wizard's spellbook. */
-export const spellCount = (c: Character): number => {
+/** How many spells the class prepares: a set number, or (SRD 5.1) the ability's modifier + 1, at least 1. */
+const preparedOf = (c: Character): number => {
   const casting = classOf(c)?.spellcasting;
 
-  return casting?.spellbook ?? casting?.prepared ?? 0;
+  if (!casting) {
+    return 0;
+  }
+
+  return casting.preparedFromAbility
+    ? Math.max(1, modifier(finalScores(c)[casting.ability]) + 1)
+    : casting.prepared;
 };
+
+/** How many level 1 spells to pick: prepared ones, or the Wizard's spellbook. */
+export const spellCount = (c: Character): number =>
+  classOf(c)?.spellcasting?.spellbook ?? preparedOf(c);
 
 /** How many of the spellbook's spells a Wizard prepares. */
 export const preparedCount = (c: Character): number =>
-  classOf(c)?.spellcasting?.spellbook
-    ? (classOf(c)?.spellcasting?.prepared ?? 0)
-    : 0;
+  classOf(c)?.spellcasting?.spellbook ? preparedOf(c) : 0;
 
-/** Cantrips the character knows from their species. */
-export const speciesCantrips = (c: Character): string[] => [
-  ...(speciesOf(c)?.cantrips ?? []),
-  ...(variantOf(c)?.cantrips ?? []),
-];
+/** Cantrips the character knows from their species: given, or picked (a High Elf's). */
+export const speciesCantrips = (c: Character): string[] => {
+  const species = speciesOf(c);
+  const choice = species?.cantripChoice;
+
+  const picked =
+    choice &&
+    c.speciesCantrip &&
+    spellsOn(c, choice.list, 0).some((spell) => spell.id === c.speciesCantrip)
+      ? [c.speciesCantrip]
+      : [];
+
+  return [
+    ...(species?.cantrips ?? []),
+    ...(variantOf(c)?.cantrips ?? []),
+    ...picked,
+  ];
+};
 
 // ── What's left to choose ──
 
@@ -709,9 +812,21 @@ const featPicksLeft = (c: Character, source: FeatSource, feat: OriginFeat) => {
   );
 };
 
-/** How many languages besides Common the character picks. */
-export const languageCount = (c: Character): number =>
-  EXTRA_LANGUAGES + (classOf(c)?.languages?.extra ?? 0);
+/** The languages the character knows without picking: Common, or their species' (SRD 5.1). */
+export const knownLanguages = (c: Character): Language[] => [
+  ...(speciesOf(c)?.languages?.known ?? ["common"]),
+];
+
+/** How many languages besides those the character picks: the species' and background's (SRD 5.1), or two Standard ones (SRD 5.2.1), and the class's. */
+export const languageCount = (c: Character): number => {
+  const species = speciesOf(c)?.languages;
+
+  const fromOrigin = species
+    ? species.extra + (backgroundOf(c)?.languages ?? 0)
+    : EXTRA_LANGUAGES;
+
+  return fromOrigin + (classOf(c)?.languages?.extra ?? 0);
+};
 
 /** 1 while something is still to choose, 0 once it's chosen. */
 const left = (chosen: boolean) => (chosen ? 0 : 1);
@@ -727,7 +842,19 @@ const speciesChoicesLeft = (c: Character): number => {
     (species.variants ? left(Boolean(variantOf(c))) : 0) +
     (species.sizes.length > 1 ? left(Boolean(c.size)) : 0) +
     (species.castingChoice ? left(Boolean(c.castingAbility)) : 0) +
-    (species.skillChoice ? left(Boolean(c.speciesSkill)) : 0) +
+    Math.max(
+      0,
+      (species.skillChoice?.count ?? (species.skillChoice ? 1 : 0)) -
+        speciesSkillPicks(c).length
+    ) +
+    Math.max(
+      0,
+      (species.boostChoice?.count ?? 0) - speciesBoostPicks(c).length
+    ) +
+    (species.toolChoice ? left(Boolean(c.speciesTool)) : 0) +
+    (species.cantripChoice
+      ? left(speciesCantrips(c).includes(c.speciesCantrip ?? ""))
+      : 0) +
     (species.featChoice ? left(Boolean(c.speciesFeat)) : 0)
   );
 };
@@ -741,7 +868,7 @@ const backgroundChoicesLeft = (c: Character): number => {
 
   return (
     (background.tool === "gaming-set" ? left(Boolean(c.backgroundTool)) : 0) +
-    (c.boost.mode === "2-1"
+    (background.abilities && c.boost.mode === "2-1"
       ? left(Boolean(c.boost.plus2)) + left(Boolean(c.boost.plus1))
       : 0)
   );

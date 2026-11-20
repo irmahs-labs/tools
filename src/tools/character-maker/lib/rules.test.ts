@@ -62,12 +62,12 @@ describe("rule packs", () => {
   });
 
   it("let an Elf and a Human pick their skill, and a Human a feat", () => {
-    const elf = make({ speciesId: "elf", speciesSkill: "survival" });
+    const elf = make({ speciesId: "elf", speciesSkills: ["survival"] });
 
     expect(proficientSkills(elf).has("survival")).toBe(true);
     // A skill the species doesn't offer doesn't count
     expect(
-      proficientSkills({ ...elf, speciesSkill: "arcana" }).has("arcana")
+      proficientSkills({ ...elf, speciesSkills: ["arcana"] }).has("arcana")
     ).toBe(false);
 
     const human = make({ speciesFeat: "alert", speciesId: "human" });

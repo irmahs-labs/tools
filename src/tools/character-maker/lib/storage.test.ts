@@ -73,7 +73,7 @@ describe("characters in this browser", () => {
     const {
       feats,
       speciesFeat: _feat,
-      speciesSkill: _skill,
+      speciesSkills: _skills,
       ...character
     } = newCharacter("old");
 
@@ -92,7 +92,7 @@ describe("characters in this browser", () => {
 
     expect(read).toMatchObject({
       speciesFeat: "skilled",
-      speciesSkill: "arcana",
+      speciesSkills: ["arcana"],
     });
     expect(read?.feats.species).toEqual(feats.species);
     expect(read).not.toHaveProperty("humanSkill");

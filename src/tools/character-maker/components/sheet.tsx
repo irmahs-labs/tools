@@ -1,11 +1,13 @@
 import type { Language } from "../../../lib/language";
 import { useLanguage } from "../../../lib/language";
 import type { Character } from "../lib/character";
+import { SRD_5_1, SRD_5_2_1 } from "../lib/packs";
 import {
   backgroundOf,
   classOf,
   formatBonus,
   goldOf,
+  knownLanguages,
   orderOf,
   originFeats,
   sheetOf,
@@ -335,7 +337,7 @@ const Proficiencies = ({ character, language, t }: PartProps) => {
   ];
 
   const languages = [
-    LANGUAGE_NAMES.common[language],
+    ...knownLanguages(character).map((id) => LANGUAGE_NAMES[id][language]),
     ...character.languages.map((id) => LANGUAGE_NAMES[id][language]),
     ...(info?.languages?.known ?? []).map((id) => LANGUAGE_NAMES[id][language]),
   ];
@@ -469,7 +471,8 @@ export const CharacterSheet = ({ character }: { character: Character }) => {
         <p>
           {parts.t.createdBy} · {parts.t.compatible}
         </p>
-        <p>{parts.t.credit}</p>
+        {character.packs.includes(SRD_5_2_1) ? <p>{parts.t.credit}</p> : null}
+        {character.packs.includes(SRD_5_1) ? <p>{parts.t.credit5_1}</p> : null}
       </footer>
     </article>
   );

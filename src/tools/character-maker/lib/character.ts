@@ -4,7 +4,7 @@ import * as z from "zod/mini";
 import { catch as withFallback } from "zod/mini";
 
 import { DEFAULT_PACKS } from "./packs";
-import { ABILITIES, ALIGNMENTS, LANGUAGES, SKILLS } from "./srd/core";
+import { ABILITIES, ALIGNMENTS, ALL_LANGUAGES, SKILLS } from "./srd/core";
 import type { Ability } from "./srd/core";
 import { INITIATE_LISTS, ORIGIN_FEATS } from "./srd/origins";
 
@@ -65,9 +65,9 @@ const blankInitiate = (): InitiateChoice => ({
 const blankFeat = (): FeatPicks => ({ initiate: blankInitiate(), skilled: [] });
 
 /**
- * A character as saved. Saves from before rule packs named the Human's and
- * the Elf's picks after them (humanFeat, humanSkill, keenSense, feats.human):
- * they're read here and renamed below.
+ * A character as saved. Older saves named the Human's and the Elf's picks
+ * after them (humanFeat, humanSkill, keenSense, feats.human), or kept one
+ * species skill (speciesSkill): they're read here and renamed below.
  */
 const savedCharacter = z.object({
   alignment: z.nullable(z.enum(ALIGNMENTS)),
@@ -105,7 +105,7 @@ const savedCharacter = z.object({
   id: z.string(),
   invocation: z.nullable(z.string()),
   keenSense: z.optional(z.nullable(skill)),
-  languages: z.array(z.enum(LANGUAGES)),
+  languages: z.array(z.enum(ALL_LANGUAGES)),
   name: z.string().check(z.maxLength(MAX_NAME)),
   notes: z.string().check(z.maxLength(MAX_NOTES)),
   /** Cleric's Divine Order or Druid's Primal Order. */
@@ -124,8 +124,15 @@ const savedCharacter = z.object({
   speciesId: z.nullable(entryId),
   /** The Origin feat the species lets them pick: a Human's Versatile. */
   speciesFeat: z.optional(z.nullable(z.enum(ORIGIN_FEATS))),
-  /** The skill the species lets them pick: an Elf's Keen Senses, a Human's Skillful. */
+  /** The +1s the species lets them place: a Half-Elf's two (SRD 5.1). */
+  speciesBoosts: withFallback(z.array(ability), []),
+  /** The cantrip the species lets them pick: a High Elf's (SRD 5.1). */
+  speciesCantrip: withFallback(z.nullable(entryId), null),
   speciesSkill: z.optional(z.nullable(skill)),
+  /** The skills the species lets them pick: an Elf's Keen Senses, a Human's Skillful. */
+  speciesSkills: z.optional(z.array(skill)),
+  /** The tool the species lets them pick: a Dwarf's artisan's tools (SRD 5.1). */
+  speciesTool: withFallback(z.nullable(entryId), null),
   /** The subclass, picked at the start; none in saves from before subclasses. */
   subclass: withFallback(z.nullable(z.string().check(z.maxLength(64))), null),
   /** The level 1 spells prepared, or for a Wizard, in the spellbook. */
@@ -141,15 +148,29 @@ const savedCharacter = z.object({
 /** A character as the maker reads one: a save, its old names renamed. */
 export const characterSchema = z.pipe(
   savedCharacter,
-  z.transform(({ feats, humanFeat, humanSkill, keenSense, ...character }) => ({
-    ...character,
-    feats: {
-      background: feats.background,
-      species: feats.species ?? feats.human ?? blankFeat(),
-    },
-    speciesFeat: character.speciesFeat ?? humanFeat ?? null,
-    speciesSkill: character.speciesSkill ?? keenSense ?? humanSkill ?? null,
-  }))
+  z.transform(
+    ({
+      feats,
+      humanFeat,
+      humanSkill,
+      keenSense,
+      speciesSkill,
+      speciesSkills,
+      ...character
+    }) => {
+      const oldSkill = speciesSkill ?? keenSense ?? humanSkill;
+
+      return {
+        ...character,
+        feats: {
+          background: feats.background,
+          species: feats.species ?? feats.human ?? blankFeat(),
+        },
+        speciesFeat: character.speciesFeat ?? humanFeat ?? null,
+        speciesSkills: speciesSkills ?? (oldSkill ? [oldSkill] : []),
+      };
+    }
+  )
 );
 
 export type Character = z.output<typeof characterSchema>;
@@ -194,9 +215,12 @@ export const newCharacter = (
   prepared: [],
   scores: { base: { ...BASE_SCORES }, method: "points" },
   size: null,
+  speciesBoosts: [],
+  speciesCantrip: null,
   speciesFeat: null,
   speciesId: null,
-  speciesSkill: null,
+  speciesSkills: [],
+  speciesTool: null,
   spells: [],
   subclass: null,
   updatedAt: now.toISOString(),
