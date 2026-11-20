@@ -19,6 +19,7 @@ export const COPY = {
     backgroundGear: "Background equipment",
     boost: "Ability increases",
     boostOne: "+1 to all three",
+    boostPick: (n: number) => `+1 to ${n} abilities of your choice`,
     boostTwo: "+2 and +1",
     cantrips: "Cantrips",
     castingAbility: "Spellcasting ability for these spells",
@@ -28,6 +29,8 @@ export const COPY = {
     classGear: "Class equipment",
     compatible: "5E compatible",
     createdBy: "Made with Character Maker on tools.irmahs.dev",
+    credit5_1:
+      "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
     credit:
       "This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.",
     damage: "Damage",
@@ -51,6 +54,8 @@ export const COPY = {
     importJson: "import a character",
     importPack: (pack: string) =>
       `This character needs the rule pack “${pack}”, which this browser doesn't have.`,
+    packsHint:
+      "The rules your character is made from. Mix them if your table does: each race, class or background keeps its own rules.",
     packs: "Rules",
     characterSlots: (used: number, max: number) =>
       `${used} of ${max} character slots used.`,
@@ -79,7 +84,7 @@ export const COPY = {
     initiative: "Initiative",
     invocation: "Eldritch Invocation",
     languages: "Languages",
-    languagesPick: (n: number) => `Common, and ${n} more`,
+    languagesPick: (known: string, n: number) => `${known}, and ${n} more`,
     left: (n: number) => (n === 1 ? "1 left" : `${n} left`),
     level1: "Level 1",
     list: "Spell list",
@@ -164,6 +169,7 @@ export const COPY = {
     backgroundGear: "Équipement d’historique",
     boost: "Augmentations",
     boostOne: "+1 aux trois",
+    boostPick: (n: number) => `+1 à ${n} caractéristiques de votre choix`,
     boostTwo: "+2 et +1",
     cantrips: "Sorts mineurs",
     castingAbility: "Caractéristique d’incantation de ces sorts",
@@ -172,6 +178,8 @@ export const COPY = {
     classGear: "Équipement de classe",
     compatible: "compatible 5E",
     createdBy: "Créé avec Character Maker sur tools.irmahs.dev",
+    credit5_1:
+      "Ce travail comprend la documentation tirée du Document de Référence du Système 5.1 (« SRD 5.1 ») par Wizards of the Coast LLC et disponible à l'adresse https://dnd.wizards.com/fr/resources/systems-reference-document. Le SRD 5.1 est distribué en vertu de la licence Creative Commons Attribution 4.0 International disponible à l'adresse https://creativecommons.org/licenses/by/4.0/legalcode.fr.",
     credit:
       "Cette œuvre inclut du matériel issu du System Reference Document 5.2.1 (« SRD 5.2.1 ») de Wizards of the Coast LLC, disponible à l’adresse https://www.dndbeyond.com/srd. Le SRD 5.2.1 est régi par la Licence Creative Commons Attribution 4.0 International, disponible à l’adresse https://creativecommons.org/licenses/by/4.0/legalcode.",
     damage: "Dégâts",
@@ -196,6 +204,8 @@ export const COPY = {
     importJson: "importer un personnage",
     importPack: (pack: string) =>
       `Ce personnage a besoin du module de règles « ${pack} », que ce navigateur n’a pas.`,
+    packsHint:
+      "Les règles dont votre personnage est fait. Mélangez-les si votre table le fait : chaque race, classe ou historique garde ses propres règles.",
     packs: "Règles",
     characterSlots: (used: number, max: number) =>
       `${used} emplacement${used > 1 ? "s" : ""} de personnage sur ${max} utilisé${used > 1 ? "s" : ""}.`,
@@ -224,7 +234,7 @@ export const COPY = {
     initiative: "Initiative",
     invocation: "Manifestation occulte",
     languages: "Langues",
-    languagesPick: (n: number) => `Le commun, et ${n} de plus`,
+    languagesPick: (known: string, n: number) => `${known}, et ${n} de plus`,
     left: (n: number) => (n === 1 ? "1 restant" : `${n} restants`),
     level1: "Niveau 1",
     list: "Liste de sorts",

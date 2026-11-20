@@ -4,13 +4,19 @@ import {
   INVOCATIONS,
   SUGGESTED_ARRAY,
 } from "./srd/classes";
-import type { ClassInfo } from "./srd/classes";
+import type { ClassInfo, FightingStyle } from "./srd/classes";
+import { LANGUAGES } from "./srd/core";
+import type { Language } from "./srd/core";
 import { BACKGROUNDS, SPECIES } from "./srd/origins";
 import type { Background, Species, Trait } from "./srd/origins";
 import { SPELLS } from "./srd/spells";
 import type { Spell } from "./srd/spells";
 import { SUBCLASSES } from "./srd/subclasses";
 import type { Subclass } from "./srd/subclasses";
+import { CLASSES_5_1, FIGHTING_STYLES_5_1 } from "./srd51/classes";
+import { BACKGROUNDS_5_1, LANGUAGES_5_1, SPECIES_5_1 } from "./srd51/origins";
+import { SPELLS_5_1 } from "./srd51/spells";
+import { SUBCLASSES_5_1 } from "./srd51/subclasses";
 import { w } from "./words";
 import type { Words } from "./words";
 
@@ -28,8 +34,10 @@ export interface PackContent {
   species: readonly Species[];
   backgrounds: readonly Background[];
   spells: readonly Spell[];
-  fightingStyles: readonly (Trait & { id: string })[];
+  fightingStyles: readonly FightingStyle[];
   invocations: readonly (Trait & { id: string })[];
+  /** The languages a character picks from, besides those they know. */
+  languages: readonly Language[];
 }
 
 export interface Pack {
@@ -43,7 +51,13 @@ export interface Pack {
   content: PackContent;
 }
 
+/** The Standard Array the SRD 5.2.1 suggests for a class of that name. */
+const suggestedFor = (name: string) =>
+  Object.entries(SUGGESTED_ARRAY).find(([id]) => id === name)?.[1];
+
 export const SRD_5_2_1 = "srd-5.2.1";
+
+export const SRD_5_1 = "srd-5.1";
 
 export const PACKS: readonly Pack[] = [
   {
@@ -57,6 +71,7 @@ export const PACKS: readonly Pack[] = [
       })),
       fightingStyles: FIGHTING_STYLES,
       invocations: INVOCATIONS,
+      languages: LANGUAGES,
       species: SPECIES,
       spells: SPELLS,
       subclasses: SUBCLASSES,
@@ -64,6 +79,27 @@ export const PACKS: readonly Pack[] = [
     id: SRD_5_2_1,
     licence: "CC-BY-4.0",
     name: w("SRD 5.2.1 (2024 rules)", "SRD 5.2.1 (règles 2024)"),
+  },
+  {
+    boostsFrom: "species",
+    builtIn: true,
+    content: {
+      backgrounds: BACKGROUNDS_5_1,
+      classes: CLASSES_5_1.map((info) => ({
+        ...info,
+        // The SRD 5.2.1's suggestions suit the same classes in the SRD 5.1
+        suggested: suggestedFor(info.id.replace("srd-5.1:", "")),
+      })),
+      fightingStyles: FIGHTING_STYLES_5_1,
+      invocations: [],
+      languages: LANGUAGES_5_1,
+      species: SPECIES_5_1,
+      spells: SPELLS_5_1,
+      subclasses: SUBCLASSES_5_1,
+    },
+    id: SRD_5_1,
+    licence: "CC-BY-4.0",
+    name: w("SRD 5.1 (2014 rules)", "SRD 5.1 (règles 2014)"),
   },
 ];
 
@@ -98,6 +134,7 @@ export const contentOf = (ids: readonly string[]): PackContent => {
     classes: packs.flatMap((pack) => pack.classes),
     fightingStyles: packs.flatMap((pack) => pack.fightingStyles),
     invocations: packs.flatMap((pack) => pack.invocations),
+    languages: [...new Set(packs.flatMap((pack) => pack.languages))],
     species: packs.flatMap((pack) => pack.species),
     spells: packs.flatMap((pack) => pack.spells),
     subclasses: packs.flatMap((pack) => pack.subclasses),

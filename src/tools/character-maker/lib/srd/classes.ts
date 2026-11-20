@@ -60,6 +60,8 @@ export interface Spellcasting {
   spellbook?: number;
   /** Pact Magic: slots come back on a Short Rest too. */
   pact?: true;
+  /** Prepares the ability's modifier + 1 spells, at least 1, not `prepared` (SRD 5.1). */
+  preparedFromAbility?: true;
 }
 
 export interface ClassInfo {
@@ -72,6 +74,8 @@ export interface ClassInfo {
   weapons: Words;
   /** Simple weapons always; Martial ones by these rules. */
   martial: "all" | "light" | "finesse-or-light" | "none";
+  /** Only these weapons, by id, "simple" for every Simple weapon: instead of `martial` (SRD 5.1). */
+  weaponList?: readonly string[];
   armor: { light?: true; medium?: true; heavy?: true; shield?: true };
   armorText: Words;
   /** Tools by id, always given. */
@@ -847,9 +851,17 @@ export const SUGGESTED_ARRAY: Record<ClassId, Record<Ability, number>> = {
 };
 
 /** The Fighter's Fighting Style feats. */
-export const FIGHTING_STYLES: readonly (Trait & { id: string })[] = [
+/** A Fighting Style, and what it adds to the sheet: AC in armor (Defense), ranged attacks (Archery). */
+export interface FightingStyle extends Trait {
+  id: string;
+  armoredAc?: number;
+  rangedAttack?: number;
+}
+
+export const FIGHTING_STYLES: readonly FightingStyle[] = [
   {
     id: "archery",
+    rangedAttack: 2,
     name: w("Archery", "Archerie"),
     text: w(
       "+2 to attack rolls with Ranged weapons.",
@@ -857,6 +869,7 @@ export const FIGHTING_STYLES: readonly (Trait & { id: string })[] = [
     ),
   },
   {
+    armoredAc: 1,
     id: "defense",
     name: w("Defense", "Défense"),
     text: w(

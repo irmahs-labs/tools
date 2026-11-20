@@ -10,6 +10,7 @@ import {
   setSpecies,
   toggleIn,
 } from "../lib/edits";
+import { PACKS } from "../lib/packs";
 import {
   backgroundOf,
   boostsOf,
@@ -18,6 +19,7 @@ import {
   finalScores,
   formatBonus,
   initiateListOf,
+  knownLanguages,
   languageCount,
   masterableWeapons,
   optionsFor,
@@ -41,7 +43,6 @@ import {
   ABILITY_SHORT,
   ALIGNMENTS,
   ALIGNMENT_NAMES,
-  LANGUAGES,
   LANGUAGE_NAMES,
   POINTS,
   POINT_COSTS,
@@ -56,6 +57,7 @@ import {
   INSTRUMENTS,
   MASTERIES,
   OTHER_TOOLS,
+  toolName,
 } from "../lib/srd/equipment";
 import {
   FEATS,
@@ -63,7 +65,7 @@ import {
   ORIGIN_FEATS,
   SIZE_NAMES,
 } from "../lib/srd/origins";
-import type { InitiateList, OriginFeat } from "../lib/srd/origins";
+import type { InitiateList, OriginFeat, Species } from "../lib/srd/origins";
 import { distance } from "../lib/words";
 import { Choices, Left } from "./choices";
 import { COPY } from "./copy";
@@ -73,6 +75,21 @@ export interface StepProps {
   character: Character;
   update: (change: (c: Character) => Character) => void;
 }
+
+/** A package as listed: what's in it and its gold, or only gold, or no gold at all. */
+const packageText = (
+  pack: { text: { en: string; fr: string }; gold: number },
+  t: (typeof COPY)["en"],
+  language: "en" | "fr"
+) => {
+  if (!pack.text[language]) {
+    return t.goldOnly(pack.gold);
+  }
+
+  return pack.gold > 0
+    ? `${pack.text[language]}, ${t.gold(pack.gold)}`
+    : pack.text[language];
+};
 
 /** A d6, for rolling scores. */
 const rollDie = () => 1 + Math.floor(Math.random() * 6);
@@ -87,6 +104,39 @@ const LIST_NAMES: Record<InitiateList, { en: string; fr: string }> = {
 
 // ── Class ──
 
+/** The rule packs this character is made from: one or more, mixed freely. */
+const PackPicker = ({ character, update }: StepProps) => {
+  const language = useLanguage();
+  const t = COPY[language];
+
+  return (
+    <fieldset className="panel">
+      <legend>{t.packs}</legend>
+      <Choices
+        legend={<span className="visually-hidden">{t.packs}</span>}
+        hint={t.packsHint}
+        wide
+        options={PACKS.map((pack) => ({
+          // At least one: the last one picked stays
+          disabled:
+            character.packs.length === 1 && character.packs.includes(pack.id),
+          id: pack.id,
+          label: pack.name[language],
+        }))}
+        chosen={character.packs}
+        onPick={(id) =>
+          update((c) => ({
+            ...c,
+            packs: c.packs.includes(id)
+              ? c.packs.filter((entry) => entry !== id)
+              : [...c.packs, id],
+          }))
+        }
+      />
+    </fieldset>
+  );
+};
+
 export const ClassStep = ({ character, update }: StepProps) => {
   const language = useLanguage();
   const t = COPY[language];
@@ -94,6 +144,7 @@ export const ClassStep = ({ character, update }: StepProps) => {
 
   return (
     <>
+      <PackPicker character={character} update={update} />
       <fieldset className="panel">
         <legend>{t.class}</legend>
         <Choices
@@ -341,6 +392,73 @@ const FeatPicker = ({
   );
 };
 
+/** The background's increases (SRD 5.2.1): +2 and +1, or +1 to all three of its abilities. */
+const BoostPicker = ({
+  abilities,
+  character,
+  update,
+}: StepProps & { abilities: readonly Ability[] }) => {
+  const language = useLanguage();
+  const t = COPY[language];
+
+  return (
+    <>
+      <fieldset className="segmented">
+        <legend className="visually-hidden">{t.boost}</legend>
+        {(["2-1", "1-1-1"] as const).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            aria-pressed={character.boost.mode === mode}
+            onClick={() =>
+              update((c) => ({
+                ...c,
+                boost: { mode, plus1: null, plus2: null },
+              }))
+            }
+          >
+            {mode === "2-1" ? t.boostTwo : t.boostOne}
+          </button>
+        ))}
+      </fieldset>
+      {character.boost.mode === "2-1" ? (
+        <div className="two-up">
+          <Choices
+            legend="+2"
+            options={abilities.map((ability) => ({
+              id: ability,
+              label: ABILITY_NAMES[ability][language],
+            }))}
+            chosen={character.boost.plus2 ? [character.boost.plus2] : []}
+            onPick={(id) =>
+              update((c) => ({
+                ...c,
+                boost: {
+                  ...c.boost,
+                  plus1: c.boost.plus1 === id ? null : c.boost.plus1,
+                  plus2: id,
+                },
+              }))
+            }
+          />
+          <Choices
+            legend="+1"
+            options={abilities.map((ability) => ({
+              disabled: ability === character.boost.plus2,
+              id: ability,
+              label: ABILITY_NAMES[ability][language],
+            }))}
+            chosen={character.boost.plus1 ? [character.boost.plus1] : []}
+            onPick={(id) =>
+              update((c) => ({ ...c, boost: { ...c.boost, plus1: id } }))
+            }
+          />
+        </div>
+      ) : null}
+    </>
+  );
+};
+
 const BackgroundPanel = ({ character, update }: StepProps) => {
   const language = useLanguage();
   const t = COPY[language];
@@ -352,7 +470,12 @@ const BackgroundPanel = ({ character, update }: StepProps) => {
       <Choices
         legend={<span className="visually-hidden">{t.background}</span>}
         options={optionsFor(character).backgrounds.map((entry) => ({
-          detail: `${entry.abilities.map((ability) => ABILITY_SHORT[ability][language]).join(", ")} · ${FEATS[entry.feat].name[language]}`,
+          detail:
+            entry.abilities && entry.feat
+              ? `${entry.abilities.map((ability) => ABILITY_SHORT[ability][language]).join(", ")} · ${FEATS[entry.feat].name[language]}`
+              : entry.skills
+                  .map((skill) => SKILL_INFO[skill].name[language])
+                  .join(", "),
           id: entry.id,
           label: entry.name[language],
         }))}
@@ -368,65 +491,25 @@ const BackgroundPanel = ({ character, update }: StepProps) => {
             </strong>{" "}
             {background.skills
               .map((skill) => SKILL_INFO[skill].name[language])
-              .join(", ")}{" "}
-            ·{" "}
-            <strong>
-              {t.feat}
-              {t.colon}
-            </strong>{" "}
-            {FEATS[background.feat].name[language]}
+              .join(", ")}
+            {background.feat ? (
+              <>
+                {" "}
+                ·{" "}
+                <strong>
+                  {t.feat}
+                  {t.colon}
+                </strong>{" "}
+                {FEATS[background.feat].name[language]}
+              </>
+            ) : null}
           </p>
-          <fieldset className="segmented">
-            <legend className="visually-hidden">{t.boost}</legend>
-            {(["2-1", "1-1-1"] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                aria-pressed={character.boost.mode === mode}
-                onClick={() =>
-                  update((c) => ({
-                    ...c,
-                    boost: { mode, plus1: null, plus2: null },
-                  }))
-                }
-              >
-                {mode === "2-1" ? t.boostTwo : t.boostOne}
-              </button>
-            ))}
-          </fieldset>
-          {character.boost.mode === "2-1" ? (
-            <div className="two-up">
-              <Choices
-                legend="+2"
-                options={background.abilities.map((ability) => ({
-                  id: ability,
-                  label: ABILITY_NAMES[ability][language],
-                }))}
-                chosen={character.boost.plus2 ? [character.boost.plus2] : []}
-                onPick={(id) =>
-                  update((c) => ({
-                    ...c,
-                    boost: {
-                      ...c.boost,
-                      plus1: c.boost.plus1 === id ? null : c.boost.plus1,
-                      plus2: id,
-                    },
-                  }))
-                }
-              />
-              <Choices
-                legend="+1"
-                options={background.abilities.map((ability) => ({
-                  disabled: ability === character.boost.plus2,
-                  id: ability,
-                  label: ABILITY_NAMES[ability][language],
-                }))}
-                chosen={character.boost.plus1 ? [character.boost.plus1] : []}
-                onPick={(id) =>
-                  update((c) => ({ ...c, boost: { ...c.boost, plus1: id } }))
-                }
-              />
-            </div>
+          {background.abilities ? (
+            <BoostPicker
+              abilities={background.abilities}
+              character={character}
+              update={update}
+            />
           ) : null}
           {background.tool === "gaming-set" ? (
             <Choices
@@ -441,15 +524,145 @@ const BackgroundPanel = ({ character, update }: StepProps) => {
               onPick={(id) => update((c) => ({ ...c, backgroundTool: id }))}
             />
           ) : null}
-          <FeatPicker
-            character={character}
-            update={update}
-            source="background"
-            feat={background.feat}
-          />
+          {background.feat ? (
+            <FeatPicker
+              character={character}
+              update={update}
+              source="background"
+              feat={background.feat}
+            />
+          ) : null}
         </>
       ) : null}
     </fieldset>
+  );
+};
+
+/** The skills a species lets the player pick: one, or (a Half-Elf) two. */
+const SpeciesSkills = ({
+  character,
+  update,
+  choice,
+  taken,
+}: StepProps & {
+  choice: {
+    label: { en: string; fr: string };
+    from: readonly Skill[];
+    count?: number;
+  };
+  taken: ReadonlySet<Skill>;
+}) => {
+  const language = useLanguage();
+  const t = COPY[language];
+  const count = choice.count ?? 1;
+  const picked = character.speciesSkills;
+
+  return (
+    <Choices
+      legend={
+        <>
+          {choice.label[language]}{" "}
+          <Left count={count - picked.length} words={t.left} />
+        </>
+      }
+      options={choice.from.map((skill) => ({
+        disabled:
+          (taken.has(skill) || picked.length >= count) &&
+          !picked.includes(skill),
+        id: skill,
+        label: SKILL_INFO[skill].name[language],
+      }))}
+      chosen={picked}
+      onPick={(id) =>
+        update((c) => ({
+          ...c,
+          // One to pick: a new one takes the old one's place
+          speciesSkills:
+            count === 1 ? [id] : toggleIn(c.speciesSkills, id, count),
+        }))
+      }
+    />
+  );
+};
+
+/** What a species lets the player pick: +1s, skills, a tool, a cantrip. */
+const SpeciesPicks = ({
+  character,
+  update,
+  species,
+  taken,
+}: StepProps & { species: Species; taken: ReadonlySet<Skill> }) => {
+  const language = useLanguage();
+  const t = COPY[language];
+
+  return (
+    <>
+      {species.boostChoice ? (
+        <Choices
+          legend={
+            <>
+              {t.boostPick(species.boostChoice.count)}{" "}
+              <Left
+                count={
+                  species.boostChoice.count - character.speciesBoosts.length
+                }
+                words={t.left}
+              />
+            </>
+          }
+          options={ABILITIES.filter(
+            (ability) => !species.boostChoice?.except.includes(ability)
+          ).map((ability) => ({
+            id: ability,
+            label: ABILITY_NAMES[ability][language],
+          }))}
+          chosen={character.speciesBoosts}
+          onPick={(id) =>
+            update((c) => ({
+              ...c,
+              speciesBoosts: toggleIn(
+                c.speciesBoosts,
+                id,
+                species.boostChoice?.count ?? 0
+              ),
+            }))
+          }
+        />
+      ) : null}
+      {species.skillChoice ? (
+        <SpeciesSkills
+          character={character}
+          update={update}
+          choice={species.skillChoice}
+          taken={taken}
+        />
+      ) : null}
+      {species.toolChoice ? (
+        <Choices
+          legend={species.toolChoice.label[language]}
+          options={species.toolChoice.from.map((id) => ({
+            id,
+            label: toolName(id)[language],
+          }))}
+          chosen={character.speciesTool ? [character.speciesTool] : []}
+          onPick={(id) => update((c) => ({ ...c, speciesTool: id }))}
+        />
+      ) : null}
+      {species.cantripChoice ? (
+        <Choices
+          legend={species.cantripChoice.label[language]}
+          options={spellsOn(character, species.cantripChoice.list, 0).map(
+            (spell) => ({
+              disabled: character.cantrips.includes(spell.id),
+              id: spell.id,
+              label: spell.name[language],
+            })
+          )}
+          chosen={character.speciesCantrip ? [character.speciesCantrip] : []}
+          onPick={(id) => update((c) => ({ ...c, speciesCantrip: id }))}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -516,16 +729,12 @@ const SpeciesPanel = ({ character, update }: StepProps) => {
           onPick={(id) => update((c) => ({ ...c, castingAbility: id }))}
         />
       ) : null}
-      {species?.skillChoice ? (
-        <Choices
-          legend={species.skillChoice.label[language]}
-          options={species.skillChoice.from.map((skill) => ({
-            disabled: taken.has(skill) && character.speciesSkill !== skill,
-            id: skill,
-            label: SKILL_INFO[skill].name[language],
-          }))}
-          chosen={character.speciesSkill ? [character.speciesSkill] : []}
-          onPick={(id) => update((c) => ({ ...c, speciesSkill: id }))}
+      {species ? (
+        <SpeciesPicks
+          character={character}
+          update={update}
+          species={species}
+          taken={taken}
         />
       ) : null}
       {species?.featChoice ? (
@@ -576,6 +785,7 @@ export const OriginStep = ({ character, update }: StepProps) => {
   const language = useLanguage();
   const t = COPY[language];
   const count = languageCount(character);
+  const known = knownLanguages(character);
 
   return (
     <>
@@ -586,15 +796,20 @@ export const OriginStep = ({ character, update }: StepProps) => {
         <Choices
           legend={
             <>
-              {t.languagesPick(count)}{" "}
+              {t.languagesPick(
+                known.map((id) => LANGUAGE_NAMES[id][language]).join(", "),
+                count
+              )}{" "}
               <Left count={count - character.languages.length} words={t.left} />
             </>
           }
-          options={LANGUAGES.filter((id) => id !== "common").map((id) => ({
-            disabled: character.languages.length >= count,
-            id,
-            label: LANGUAGE_NAMES[id][language],
-          }))}
+          options={optionsFor(character)
+            .languages.filter((id) => !known.includes(id))
+            .map((id) => ({
+              disabled: character.languages.length >= count,
+              id,
+              label: LANGUAGE_NAMES[id][language],
+            }))}
           chosen={character.languages}
           onPick={(id: Tongue) =>
             update((c) => ({
@@ -1085,9 +1300,7 @@ export const EquipmentStep = ({ character, update }: StepProps) => {
             legend={<span className="visually-hidden">{t.classGear}</span>}
             wide
             options={info.packages.map((pack, index) => ({
-              detail: pack.text[language]
-                ? `${pack.text[language]}, ${t.gold(pack.gold)}`
-                : t.goldOnly(pack.gold),
+              detail: packageText(pack, t, language),
               id: String(index),
               label: letters[index] ?? String(index + 1),
             }))}
@@ -1106,11 +1319,23 @@ export const EquipmentStep = ({ character, update }: StepProps) => {
             wide
             options={[
               {
-                detail: `${background.equipment[language]}, ${t.gold(background.gold)}`,
+                detail: packageText(
+                  { gold: background.gold, text: background.equipment },
+                  t,
+                  language
+                ),
                 id: "a" as const,
                 label: "A",
               },
-              { detail: t.goldOnly(50), id: "gold" as const, label: "B" },
+              ...(background.goldInstead
+                ? [
+                    {
+                      detail: t.goldOnly(background.goldInstead),
+                      id: "gold" as const,
+                      label: "B",
+                    },
+                  ]
+                : []),
             ]}
             chosen={[character.backgroundPackage]}
             onPick={(id) => update((c) => ({ ...c, backgroundPackage: id }))}

@@ -1,7 +1,7 @@
 import { w } from "../words";
 import type { Words } from "../words";
 import { SKILLS } from "./core";
-import type { Ability, Skill } from "./core";
+import type { Ability, Language, Skill } from "./core";
 
 /**
  * SRD 5.2.1, "Character Origins": the four backgrounds, the nine species and
@@ -77,17 +77,24 @@ export const INITIATE_LISTS: readonly InitiateList[] = [
 export interface Background {
   id: string;
   name: Words;
-  /** The three abilities it can raise: +2 and +1, or +1 to all three. */
-  abilities: readonly [Ability, Ability, Ability];
-  feat: OriginFeat;
+  /** The three abilities it can raise: +2 and +1, or +1 to all three (SRD 5.2.1). */
+  abilities?: readonly [Ability, Ability, Ability];
+  /** Its Origin feat (SRD 5.2.1). */
+  feat?: OriginFeat;
   /** The list for its Magic Initiate, when that is its feat. */
   initiateList?: InitiateList;
-  skills: readonly [Skill, Skill];
+  skills: readonly Skill[];
   /** A tool by id, or "gaming-set" to choose one. */
-  tool: string;
-  /** Package A; package B is always 50 GP. */
+  tool?: string;
+  /** How many languages of their choice it teaches (SRD 5.1). */
+  languages?: number;
+  /** Its feature (SRD 5.1): the Acolyte's Shelter of the Faithful. */
+  trait?: Trait;
+  /** Package A. */
   equipment: Words;
   gold: number;
+  /** The gold package B gives instead of package A, when there is one (SRD 5.2.1: 50 GP). */
+  goldInstead?: number;
   /** The weapons and armor in package A, by id, for the sheet's attacks. */
   gear: readonly string[];
 }
@@ -100,6 +107,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "Matériel de calligraphe, livre (de prières), symbole sacré, parchemin (10 feuilles), robe"
     ),
     feat: "magic-initiate",
+    goldInstead: 50,
     gear: [],
     gold: 8,
     id: "acolyte",
@@ -115,6 +123,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "2 dagues, outils de voleur, 2 bourses, pied-de-biche, tenue de voyage"
     ),
     feat: "alert",
+    goldInstead: 50,
     gear: ["dagger", "dagger"],
     gold: 16,
     id: "criminal",
@@ -129,6 +138,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "Bâton de combat, matériel de calligraphe, livre (d’histoire), parchemin (8 feuilles), robe"
     ),
     feat: "magic-initiate",
+    goldInstead: 50,
     gear: ["quarterstaff"],
     gold: 8,
     id: "sage",
@@ -144,6 +154,7 @@ export const BACKGROUNDS: readonly Background[] = [
       "Lance, arc court, 20 flèches, boîte de jeux (du même type que ci-dessus), trousse de soins, carquois, tenue de voyage"
     ),
     feat: "savage-attacker",
+    goldInstead: 50,
     gear: ["spear", "shortbow"],
     gold: 14,
     id: "soldier",
@@ -183,12 +194,28 @@ export interface Species {
   castingChoice?: true;
   /** Cantrips every member knows, by spell id. */
   cantrips?: readonly string[];
-  /** A skill to pick: an Elf's Keen Senses, a Human's Skillful. */
-  skillChoice?: { label: Words; from: readonly Skill[] };
+  /** Skills to pick (one unless `count` says): an Elf's Keen Senses, a Human's Skillful. */
+  skillChoice?: { label: Words; from: readonly Skill[]; count?: number };
   /** An Origin feat to pick: a Human's Versatile. */
   featChoice?: true;
   /** Hit Points added per level: a Dwarf's Dwarven Toughness. */
   hitPointsPerLevel?: number;
+  /** Ability increases every member gets (SRD 5.1): an Elf's +2 Dexterity. */
+  boosts?: Partial<Record<Ability, number>>;
+  /** +1 to this many abilities of the player's choice, but these: a Half-Elf's. */
+  boostChoice?: { count: number; except: readonly Ability[] };
+  /** Skills every member is proficient in: an Elf's Perception (SRD 5.1). */
+  skills?: readonly Skill[];
+  /** The languages every member knows, and how many more they pick; without it, the SRD 5.2.1's Common and two Standard Languages. */
+  languages?: { known: readonly Language[]; extra: number };
+  /** Weapons every member is proficient with, by id: Dwarven Combat Training. */
+  weapons?: readonly string[];
+  /** Tools every member is proficient with, by id: a Rock Gnome's tinker's tools. */
+  tools?: readonly string[];
+  /** A tool to pick, by id: a Dwarf's artisan's tools. */
+  toolChoice?: { label: Words; from: readonly string[] };
+  /** A cantrip to pick from a class's list, cast with this ability: a High Elf's. */
+  cantripChoice?: { label: Words; list: string; ability: Ability };
 }
 
 const PB_LONG = w(

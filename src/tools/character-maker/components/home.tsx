@@ -292,6 +292,7 @@ export const Home = () => {
 
         <p className="hint center">{t.savedHere}</p>
         <p className="credit">{t.credit}</p>
+        <p className="credit">{t.credit5_1}</p>
       </main>
       <DeleteDialog
         dialog={dialog}

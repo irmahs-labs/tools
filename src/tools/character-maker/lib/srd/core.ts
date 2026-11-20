@@ -100,7 +100,31 @@ export const SCORE_CAP = 20;
 export const PROFICIENCY_BONUS = 2;
 
 /** The Standard Languages: every character knows Common and two more of these. */
-export const LANGUAGES = [
+/** Every language a character can know, in any pack. */
+export const ALL_LANGUAGES = [
+  "abyssal",
+  "celestial",
+  "common",
+  "common-sign",
+  "deep-speech",
+  "draconic",
+  "dwarvish",
+  "elvish",
+  "giant",
+  "gnomish",
+  "goblin",
+  "halfling",
+  "infernal",
+  "orc",
+  "primordial",
+  "sylvan",
+  "undercommon",
+] as const;
+
+export type Language = (typeof ALL_LANGUAGES)[number];
+
+/** The SRD 5.2.1's Standard Languages, the ones a character picks from. */
+export const LANGUAGES: readonly Language[] = [
   "common",
   "common-sign",
   "draconic",
@@ -111,16 +135,17 @@ export const LANGUAGES = [
   "goblin",
   "halfling",
   "orc",
-] as const;
-
-export type Language = (typeof LANGUAGES)[number];
+];
 
 export const LANGUAGE_NAMES: Record<
   Language | "thieves-cant" | "druidic",
   Words
 > = {
+  abyssal: w("Abyssal", "Abyssal"),
+  celestial: w("Celestial", "Céleste"),
   common: w("Common", "Commun"),
   "common-sign": w("Common Sign Language", "Langue multiverselle des signes"),
+  "deep-speech": w("Deep Speech", "Profond"),
   draconic: w("Draconic", "Draconique"),
   druidic: w("Druidic", "Druidique"),
   dwarvish: w("Dwarvish", "Nain"),
@@ -129,8 +154,12 @@ export const LANGUAGE_NAMES: Record<
   gnomish: w("Gnomish", "Gnome"),
   goblin: w("Goblin", "Gobelin"),
   halfling: w("Halfling", "Halfelin"),
+  infernal: w("Infernal", "Infernal"),
   orc: w("Orc", "Orc"),
+  primordial: w("Primordial", "Primordial"),
+  sylvan: w("Sylvan", "Sylvestre"),
   "thieves-cant": w("Thieves’ Cant", "Argot des voleurs"),
+  undercommon: w("Undercommon", "Commun des profondeurs"),
 };
 
 /** How many Standard Languages a character picks besides Common. */

@@ -464,7 +464,7 @@ export interface Armor {
   strength?: number;
 }
 
-/** The armor in the starting equipment; the rest of the SRD's isn't sold at level 1 here. */
+/** The armor in the starting equipment (Scale Mail for SRD 5.1's); the rest of the SRD's isn't sold at level 1 here. */
 export const ARMORS: readonly Armor[] = [
   {
     ac: 11,
@@ -486,6 +486,14 @@ export const ARMORS: readonly Armor[] = [
     id: "chain-shirt",
     maxDex: 2,
     name: w("Chain Shirt", "Chemise de mailles"),
+  },
+  {
+    ac: 14,
+    category: "medium",
+    id: "scale-mail",
+    maxDex: 2,
+    name: w("Scale Mail", "Armure d’écailles"),
+    stealthDisadvantage: true,
   },
   {
     ac: 16,
