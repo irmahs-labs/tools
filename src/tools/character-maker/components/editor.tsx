@@ -65,8 +65,7 @@ const Editing = ({ initial }: { initial: Character }) => {
   const index = STEPS.indexOf(step);
   const Screen = STEP_SCREENS[step];
 
-  const update = (change: (c: Character) => Character) =>
-    setCharacter(change);
+  const update = (change: (c: Character) => Character) => setCharacter(change);
 
   // Saved once the change is made, not while React works it out: saving
   // tells the page the list changed, which can't happen mid-render
