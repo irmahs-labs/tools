@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Footer } from "../../../components/footer";
 import { Window } from "../../../components/window";
@@ -65,14 +65,17 @@ const Editing = ({ initial }: { initial: Character }) => {
   const index = STEPS.indexOf(step);
   const Screen = STEP_SCREENS[step];
 
-  const update = (change: (c: Character) => Character) =>
-    setCharacter((current) => {
-      const next = change(current);
+  const update = (change: (c: Character) => Character) => setCharacter(change);
 
-      saveCharacter(next);
+  // Saved once the change is made, not while React works it out: saving
+  // tells the page the list changed, which can't happen mid-render
+  const opened = useRef(character);
 
-      return next;
-    });
+  useEffect(() => {
+    if (character !== opened.current) {
+      saveCharacter(character);
+    }
+  }, [character]);
 
   const go = (to: Step) => {
     setStep(to);

@@ -7,6 +7,7 @@ import { useCopy, useLanguage } from "../../../lib/language";
 import { linkTo, navigate } from "../../../router";
 import { newCharacter } from "../lib/character";
 import type { Character } from "../lib/character";
+import { MAX_OWN_PACKS, saveOwnPack } from "../lib/own-packs";
 import { packById } from "../lib/packs";
 import { backgroundOf, classOf, speciesOf, subclassOf } from "../lib/rules";
 import {
@@ -24,6 +25,8 @@ import {
 import type { ImportResult } from "../lib/transfer";
 import { characterPath, sheetPath } from "../paths";
 import { COPY } from "./copy";
+import { OWN_COPY } from "./own-copy";
+import { OwnPacksSection } from "./own-packs-section";
 import { Topbar } from "./topbar";
 
 /** Opens the sheet in a new tab with the print dialog, where it saves as PDF. */
@@ -185,7 +188,8 @@ const DeleteDialog = ({
 
 /** Character Maker's own page: what it does, a way to start or import, and the characters made in this browser. */
 export const Home = () => {
-  const t = useCopy(COPY);
+  const language = useLanguage();
+  const t = COPY[language];
   const characters = useCharacters();
   const full = characters.length >= MAX_SLOTS;
   const [message, setMessage] = useState("");
@@ -234,11 +238,25 @@ export const Home = () => {
       return;
     }
 
-    setMessage(
-      saveCharacter(result.character)
-        ? t.imported(result.character.name.trim() || t.untitled)
-        : t.full(MAX_SLOTS)
-    );
+    // The player's own packs it was made with come with it
+    const own = OWN_COPY[language];
+
+    if (!result.packs.every((pack) => saveOwnPack(pack))) {
+      setMessage(own.full(MAX_OWN_PACKS));
+
+      return;
+    }
+
+    if (!saveCharacter(result.character)) {
+      setMessage(t.full(MAX_SLOTS));
+
+      return;
+    }
+
+    const name = t.imported(result.character.name.trim() || t.untitled);
+    const packs = result.packs.map((pack) => `“${pack.name}”`).join(", ");
+
+    setMessage(packs ? `${name} ${own.usedWith(packs)}` : name);
   };
 
   const askDelete = (character: Character) => {
@@ -289,6 +307,8 @@ export const Home = () => {
             ))}
           </ul>
         )}
+
+        <OwnPacksSection />
 
         <p className="hint center">{t.savedHere}</p>
         <p className="credit">{t.credit}</p>

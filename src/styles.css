@@ -1807,6 +1807,74 @@ fieldset.segmented {
 .character-packs {
   font-size: 12px;
 }
+/* The player's own packs: their list on the home page, and their editor */
+.own-packs {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.own-packs .hub-hello h2 {
+  margin: 0;
+}
+.own-editor .own-kind {
+  flex: 1 1 100%;
+}
+.own-kind .window-body,
+.own-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.own-kind h2 {
+  margin: 0;
+  font-family: var(--display);
+}
+.own-kind > .window-body > .pill,
+.own-traits > .pill {
+  align-self: flex-start;
+}
+.own-entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.own-entry {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--outline);
+  font-weight: 700;
+}
+.own-row,
+.own-boosts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+.own-boosts {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+}
+.own-trait {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1.5px dashed var(--outline);
+  border-radius: var(--radius-field);
+}
+.own-trait .pill {
+  align-self: flex-start;
+}
+.number-input {
+  min-height: 44px;
+}
 .cm-home .center {
   flex: 1 1 100%;
   text-align: center;

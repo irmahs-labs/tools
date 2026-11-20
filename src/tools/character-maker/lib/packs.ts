@@ -1,3 +1,4 @@
+import { ownPacksVersion, ownRulePacks } from "./own-packs";
 import {
   CLASSES,
   FIGHTING_STYLES,
@@ -24,9 +25,10 @@ import type { Words } from "./words";
  * Rule packs: where a character's species, backgrounds, classes, subclasses
  * and spells come from. Each character keeps the ids of the packs it was made
  * with, and the rules only offer and read what those packs hold. An entry's
- * id is unique across every pack, so a choice names one entry. For now the
- * only pack is the SRD 5.2.1; other free rulebooks and players' own packs
- * come next (see the design note "Character Maker Packs" in Irma's notes).
+ * id is unique across every pack, so a choice names one entry. The free
+ * rulebooks ship with the maker; players' own packs are kept in their
+ * browser (own-packs.ts). See the design note "Character Maker Packs" in
+ * Irma's notes.
  */
 export interface PackContent {
   classes: readonly ClassInfo[];
@@ -46,8 +48,8 @@ export interface Pack {
   /** Where a species or background takes its ability increases from by default. */
   boostsFrom: "background" | "species";
   licence: string;
-  /** Ships with the maker, so a character file only names it. */
-  builtIn: true;
+  /** Ships with the maker, so a character file only names it; a player's own pack goes in the file whole. */
+  builtIn: boolean;
   content: PackContent;
 }
 
@@ -106,16 +108,28 @@ export const PACKS: readonly Pack[] = [
 /** The packs a new character starts with. */
 export const DEFAULT_PACKS: readonly string[] = [SRD_5_2_1];
 
+/** The built-in packs, then the player's own. */
+export const allPacks = (): readonly Pack[] => [...PACKS, ...ownRulePacks()];
+
 export const packById = (id: string): Pack | undefined =>
-  PACKS.find((pack) => pack.id === id);
+  PACKS.find((pack) => pack.id === id) ??
+  ownRulePacks().find((pack) => pack.id === id);
 
 const merged = new Map<string, PackContent>();
+
+/** Which reading of the player's own packs `merged` was worked out from. */
+let mergedFrom = 0;
 
 /**
  * Everything the packs named by `ids` hold, together; worked out once per
  * set of packs. Packs this maker doesn't have add nothing.
  */
 export const contentOf = (ids: readonly string[]): PackContent => {
+  if (mergedFrom !== ownPacksVersion()) {
+    merged.clear();
+    mergedFrom = ownPacksVersion();
+  }
+
   const key = ids.join("\n");
   const known = merged.get(key);
 
