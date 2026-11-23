@@ -16,6 +16,7 @@ const COPY = {
     all: "all tools",
     app: "Tools · by Irma HS",
     close: "Close the menu",
+    home: "Tools home: every tool",
     menu: "Menu",
     pages: (tool: string) => `${tool}: its pages`,
     tools: "Every tool and its pages",
@@ -24,6 +25,7 @@ const COPY = {
     all: "tous les outils",
     app: "Tools · par Irma HS",
     close: "Fermer le menu",
+    home: "Accueil de Tools : tous les outils",
     menu: "Menu",
     pages: (tool: string) => `${tool} : ses pages`,
     tools: "Tous les outils et leurs pages",
@@ -57,6 +59,24 @@ const MenuIcon = ({ close = false }: { close?: boolean }) => (
     aria-hidden="true"
   >
     <path d={close ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h16M4 17h16"} />
+  </svg>
+);
+
+const HomeIcon = () => (
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M4 11l8-7 8 7" />
+    <path d="M6 9.5V20h12V9.5" />
+    <path d="M10 20v-5h4v5" />
   </svg>
 );
 
@@ -145,7 +165,8 @@ const ToolMenu = ({
 };
 
 /**
- * Every tool page's header, uncluttered: the tool's logo, which goes back
+ * Every tool page's header, uncluttered: a house button back to every
+ * tool, the tool's logo, which goes back
  * to every tool, and its name, "Tools · by Irma HS" under it, which goes to
  * the tool's own home; the page's own buttons (`actions`, and `end` before
  * the shared pills), and the shared pills. Under it, the tool's pages as
@@ -184,6 +205,15 @@ export const ToolHeader = ({
       <header className={`topbar ${className}`}>
         <ToolMenu slug={slug} tabs={shown} />
         <div className="brand">
+          <a
+            href="/"
+            onClick={linkTo("/")}
+            className="tool-home-button"
+            aria-label={t.home}
+            title={t.home}
+          >
+            <HomeIcon />
+          </a>
           <a
             href="/"
             onClick={linkTo("/")}
