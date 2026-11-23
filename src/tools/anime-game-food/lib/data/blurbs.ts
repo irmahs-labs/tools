@@ -36,8 +36,8 @@ export const BLURBS = {
       "Bœuf et mousse de poulet en croûte, demi-glace au vin rouge, à partir de surgelés et de conserves.",
     ],
     "Beef stew": [
-      "A beef stew made with several cuts of beef.",
-      "Un ragoût de bœuf fait de plusieurs morceaux de bœuf.",
+      "Several cuts of beef and oxtail stewed on onion, carrot and celery.",
+      "Plusieurs morceaux de bœuf et de la queue de bœuf mijotés sur oignon, carotte et céleri.",
     ],
     "Bewitching roast beef": [
       "Roast beef with a poached egg and a horseradish cream sauce.",

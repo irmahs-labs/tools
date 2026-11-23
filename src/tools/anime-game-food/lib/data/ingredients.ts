@@ -180,6 +180,7 @@ export const INGREDIENT_FR = {
   onion: "oignon",
   orange: "orange",
   oregano: "origan",
+  oxtail: "queue de bœuf",
   "oyster sauce": "sauce d’huître",
   paprika: "paprika",
   parmesan: "parmesan",

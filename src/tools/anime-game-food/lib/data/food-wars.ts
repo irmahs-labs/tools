@@ -310,7 +310,12 @@ export const FOOD_WARS: readonly Dish[] = [
     "soft-shell turtle, pork, bao bun, lily buds, Shaoxing wine, schisandra berry, ginger"
   ),
   fw("Semifreddo", TAKUMI, "s2-dessert", "praline, sponge cake, egg, cream"),
-  fw("Beef stew", SOMA, "s2-semi", "beef"),
+  fw(
+    "Beef stew",
+    SOMA,
+    "s2-semi",
+    "beef, oxtail, onion, carrot, celery, clove, black pepper"
+  ),
   fw(
     "Duck Apicius",
     AKIRA,
