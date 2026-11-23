@@ -1,10 +1,11 @@
-import type { Dish, SceneId } from "./dish";
+import type { Dish } from "../dish";
+import type { SceneId } from "./scenes";
 
 /**
  * Pokémon Sleep's recipes, from serebii.net/pokemonsleep/dishes.shtml
  * (checked 2026-11-23), without the "Mixed" dishes, which have no recipe.
  * Ingredients are the real food behind each game name ("Fancy Apple" is
- * apple), and the amounts are left out; Slowpoke tail has no real one.
+ * apple, Slowpoke tail is protein), and the amounts are left out.
  */
 const GAME_NAMES = {
   "Bean Sausage": "sausage",
@@ -20,7 +21,7 @@ const GAME_NAMES = {
   "Plump Pumpkin": "pumpkin",
   "Pure Oil": "oil",
   "Rousing Coffee": "coffee",
-  "Slowpoke Tail": "Slowpoke tail",
+  "Slowpoke Tail": "protein",
   "Snackable Nuts": "nuts",
   "Snoozy Tomato": "tomato",
   "Soft Potato": "potato",

@@ -4,7 +4,9 @@ import { Footer } from "../../../components/footer";
 import { ToolHeader } from "../../../components/tool-header";
 import { Window } from "../../../components/window";
 import { useCopy, useLanguage } from "../../../lib/language";
+import { ingredientName } from "../lib/data/ingredients";
 import {
+  blurbOf,
   cookOf,
   pickDish,
   sceneOf,
@@ -14,7 +16,6 @@ import {
 } from "../lib/dish";
 import type { Dish, SourceId, SourceKind } from "../lib/dish";
 import { DISHES } from "../lib/dishes";
-import { ingredientName } from "../lib/ingredients";
 
 const COPY = {
   en: {
@@ -79,6 +80,7 @@ const DishCard = ({ dish }: { dish: Dish }) => {
         <span>{source.name}</span>
       </p>
       <h2 className="dish-name">{dish.name}</h2>
+      <p className="dish-blurb">{blurbOf(dish, language)}</p>
       <p className="dish-scene">
         {cook ? `${t.by(cook)} · ` : ""}
         {sceneOf(dish, language)}

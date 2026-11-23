@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { cookOf, pickDish, SCENES, sourcesOfKind } from "./dish";
+import { BLURBS } from "./data/blurbs";
+import { FOOD_WARS } from "./data/food-wars";
+import { hasFrench, ingredientName } from "./data/ingredients";
+import { POKEMON_SLEEP, realIngredient } from "./data/pokemon-sleep";
+import { SCENES } from "./data/scenes";
+import { blurbOf, cookOf, pickDish, sourcesOfKind } from "./dish";
 import type { SourceId } from "./dish";
 import { DISHES } from "./dishes";
-import { FOOD_WARS } from "./food-wars";
-import { hasFrench, ingredientName } from "./ingredients";
-import { POKEMON_SLEEP, realIngredient } from "./pokemon-sleep";
 
 describe("the dishes", () => {
   it("has every Pokémon Sleep recipe but the three Mixed ones", () => {
@@ -47,9 +49,28 @@ describe("the dishes", () => {
     }
   });
 
+  it("gives every dish a one-liner in both languages", () => {
+    for (const dish of DISHES) {
+      expect(blurbOf(dish, "en"), dish.name).not.toBe("");
+      expect(blurbOf(dish, "fr"), dish.name).not.toBe("");
+    }
+  });
+
+  it("has no one-liner for a dish that isn't there", () => {
+    for (const [source, blurbs] of Object.entries(BLURBS)) {
+      for (const name of Object.keys(blurbs)) {
+        expect(
+          DISHES.some((d) => d.source === source && d.name === name),
+          `${source}: ${name}`
+        ).toBe(true);
+      }
+    }
+  });
+
   it("uses real food for the game's ingredient names", () => {
     expect(realIngredient("Fancy Apple")).toBe("apple");
     expect(realIngredient("Moomoo Milk")).toBe("milk");
+    expect(realIngredient("Slowpoke Tail")).toBe("protein");
     expect(() => realIngredient("Fancy Pear")).toThrow();
     expect(POKEMON_SLEEP.flatMap((d) => d.ingredients)).not.toContain(
       "Fancy Apple"

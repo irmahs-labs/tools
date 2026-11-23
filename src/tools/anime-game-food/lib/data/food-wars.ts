@@ -1,4 +1,5 @@
-import type { Dish, SceneId } from "./dish";
+import type { Dish } from "../dish";
+import type { SceneId } from "./scenes";
 
 /**
  * Food Wars! dishes, from Irma's notes, in story order. Ingredients are

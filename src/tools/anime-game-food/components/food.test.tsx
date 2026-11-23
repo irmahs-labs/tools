@@ -5,8 +5,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "../../../app";
 import { setUpDom } from "../../../components/dom-test-setup";
-import { FOOD_WARS } from "../lib/food-wars";
-import { POKEMON_SLEEP } from "../lib/pokemon-sleep";
+import { FOOD_WARS } from "../lib/data/food-wars";
+import { POKEMON_SLEEP } from "../lib/data/pokemon-sleep";
 import { FOOD_HOME } from "../paths";
 
 setUpDom();

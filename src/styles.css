@@ -2414,6 +2414,11 @@ fieldset.segmented {
   line-height: 1.1;
   overflow-wrap: anywhere;
 }
+.dish-blurb {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+}
 .dish-scene {
   margin: 0;
   font-size: 14px;

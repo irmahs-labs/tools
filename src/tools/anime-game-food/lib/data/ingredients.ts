@@ -1,4 +1,4 @@
-import type { Language } from "../../../lib/language";
+import type { Language } from "../../../../lib/language";
 
 /**
  * Every ingredient's French name, by its English one as the dish data
@@ -205,6 +205,7 @@ export const INGREDIENT_FR = {
   poussin: "coquelet",
   praline: "praliné",
   prosciutto: "prosciutto",
+  protein: "protéine",
   prune: "pruneau",
   pumpkin: "citrouille",
   quail: "caille",
@@ -252,7 +253,6 @@ export const INGREDIENT_FR = {
   shiso: "shiso",
   shrimp: "crevette",
   "Sichuan pepper": "poivre du Sichuan",
-  "Slowpoke tail": "queue de Ramoloss",
   snake: "serpent",
   soba: "soba",
   "soft-shell turtle": "tortue à carapace molle",
