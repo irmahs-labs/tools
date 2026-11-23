@@ -6,6 +6,8 @@ import { usePath, withoutTrailingSlashes } from "./router";
 import { Landing } from "./tools/album-cover-maker/components/landing";
 import { Maker } from "./tools/album-cover-maker/components/maker";
 import { ALBUM_HOME, ALBUM_MAKER } from "./tools/album-cover-maker/paths";
+import { Food } from "./tools/anime-game-food/components/food";
+import { FOOD_HOME } from "./tools/anime-game-food/paths";
 import { Editor } from "./tools/character-maker/components/editor";
 import { Home as CharacterHome } from "./tools/character-maker/components/home";
 import { PackEditor } from "./tools/character-maker/components/pack-editor";
@@ -13,6 +15,7 @@ import { SheetPage } from "./tools/character-maker/components/sheet-page";
 import { characterPageAt } from "./tools/character-maker/paths";
 
 type Page =
+  | "food"
   | "hub"
   | "album"
   | "maker"
@@ -24,6 +27,10 @@ type Page =
 /** The page at `path`; any address Tools doesn't know is the hub. */
 export const pageAt = (path: string): Page => {
   const bare = withoutTrailingSlashes(path);
+
+  if (bare === FOOD_HOME) {
+    return "food";
+  }
 
   if (bare === ALBUM_MAKER) {
     return "maker";
@@ -77,6 +84,7 @@ export const App = () => {
       character: `${editing} · ${characters}`,
       "character-pack": `${pack} · ${characters}`,
       "character-sheet": `${sheet} · ${characters}`,
+      food: `Anime & Game Food ${by} Irma HS`,
       characters,
       hub: `Tools ${by} Irma HS`,
       maker: `${make} · ${album}`,
@@ -84,6 +92,10 @@ export const App = () => {
 
     document.title = titles[page];
   }, [page, french]);
+
+  if (page === "food") {
+    return <Food />;
+  }
 
   if (page === "maker") {
     return <Maker />;

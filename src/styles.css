@@ -2371,3 +2371,110 @@ fieldset.segmented {
 .site-links a:hover {
   text-decoration-thickness: 2px;
 }
+
+/* Anime & Game Food: the dish window, then where dishes come from */
+.food-hero {
+  flex: 2 1 480px;
+}
+.food-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+  min-width: 0;
+}
+.dish {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-xs);
+  background: var(--raised);
+  color: var(--text);
+}
+.dish-from {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+.dish-kind {
+  font-size: 13px;
+  padding: 2px 10px;
+}
+.dish-name {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 600;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.dish-blurb {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.dish-scene {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.dish-heading {
+  margin: 6px 0 0;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.dish-ingredients {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dish-ingredients li {
+  padding: 3px 10px;
+  border: 1.5px solid var(--outline);
+  border-radius: 999px;
+  background: var(--panel);
+  font-size: 14px;
+}
+.food-sources {
+  flex: 1 1 260px;
+}
+.food-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.food-preset {
+  flex: 1 1 auto;
+  padding: 0 12px;
+}
+.food-group {
+  display: flex;
+  flex-direction: column;
+}
+.food-group-name {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+}
+.food-source input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--strong);
+}
+.food-fan {
+  flex: 1 1 100%;
+  margin: 0;
+}

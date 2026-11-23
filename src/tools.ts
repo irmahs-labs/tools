@@ -3,6 +3,8 @@ import type { ComponentType } from "react";
 import type { Language } from "./lib/language";
 import { Logo as AlbumCoverLogo } from "./tools/album-cover-maker/components/logo";
 import { ALBUM_HOME, ALBUM_MAKER } from "./tools/album-cover-maker/paths";
+import { Logo as FoodLogo } from "./tools/anime-game-food/components/logo";
+import { FOOD_HOME } from "./tools/anime-game-food/paths";
 import { Logo as CharacterLogo } from "./tools/character-maker/components/logo";
 import { CHARACTER_HOME } from "./tools/character-maker/paths";
 
@@ -24,6 +26,20 @@ export interface Tool {
 }
 
 export const TOOLS: readonly Tool[] = [
+  {
+    Logo: FoodLogo,
+    blurb: {
+      en: "Click once for a dish from an anime or a game, with its ingredients. Pick which shows and games it draws from.",
+      fr: "Un clic pour un plat tiré d’un animé ou d’un jeu, avec ses ingrédients. Choisissez les séries et les jeux.",
+    },
+    href: FOOD_HOME,
+    legend: "anime-game-food.exe",
+    name: { en: "Anime & Game Food", fr: "Anime & Game Food" },
+    pages: [
+      { href: FOOD_HOME, name: { en: "Get a dish", fr: "Tirer un plat" } },
+    ],
+    slug: "anime-game-food",
+  },
   {
     Logo: CharacterLogo,
     blurb: {

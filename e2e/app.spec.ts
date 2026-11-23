@@ -354,6 +354,7 @@ for (const path of [
   "/",
   "/album-cover-maker",
   "/album-cover-maker/make",
+  "/anime-game-food",
   "/character-maker",
 ]) {
   test(`${path} fits a phone screen without sideways scrolling`, async ({
@@ -417,4 +418,19 @@ test("the character pages fit a phone screen without sideways scrolling", async 
   await page.getByRole("button", { name: "Menu" }).click();
   await page.locator(".tool-drawer__link", { hasText: "Sheet" }).click();
   expect(await overflow()).toBeLessThanOrEqual(0);
+});
+
+test("Anime & Game Food draws a dish with its ingredients", async ({
+  page,
+}) => {
+  await page.goto("/anime-game-food");
+  await page.getByRole("button", { name: "games only" }).click();
+  await page.getByRole("button", { name: "give me a dish" }).click();
+
+  const dish = page.getByRole("article");
+  await expect(dish.getByText("Pokémon Sleep")).toBeVisible();
+  await expect(dish.getByRole("listitem").first()).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "another dish" })
+  ).toBeVisible();
 });

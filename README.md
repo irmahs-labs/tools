@@ -2,6 +2,7 @@
 
 Little tools for making things, at https://tools.irmahs.dev. The hub at `/` lists them; each tool lives at `/<slug>`.
 
+- **Anime & Game Food** (`/anime-game-food`): one click gives a random dish from an anime or a game, with its ingredients, from everything, anime only, games only, or the shows and games you tick. Food Wars! dishes come from Irma's notes and Pokémon Sleep's recipes from Serebii; ingredients are simplified to what you'd buy ("Fancy Apple" is apple, Slowpoke tail is protein), and each dish has a one-liner of its own. A fan-made list, with no images from the shows or games.
 - **Character Maker** (`/character-maker`, each character at `/character-maker/<id>` and its sheet at `/character-maker/<id>/sheet`): a level 1 character for fifth edition, step by step (class, origin, scores, skills, spells, gear, details), with every number on the sheet worked out, and a one-page sheet to print or save as PDF. The subclass is picked at the start, as a house rule. Characters are kept in this browser only, five at most: each exports as PDF (the sheet) or JSON (a character file, which imports back and which Mini Games' one-shot will read). It uses the System Reference Documents 5.2.1 (2024 rules) and 5.1 (2014 rules) only, as rule packs each character picks and can mix (in English, and in their official French translations), under CC-BY-4.0, with the attributions the SRDs ask for; it is "5E compatible" and never names the game it's compatible with. Players can add their own species, backgrounds, spells and subclasses (from a book they own, or homebrew) as packs of their own, kept in their browser and shared as files with their table.
 - **Album Cover Maker** (`/album-cover-maker`, the maker at `/album-cover-maker/make`): drop in a photo, add a title, pick a font and colour combo, and export a 3000 × 3000 cover PNG plus a 1080 × 1440 music player mock-up. No sign-up or login, and photos never leave the browser. It used to be its own app at album-cover-maker.irmahs.dev (irmahs-labs/album-cover-maker, where its history is); that address is gone now. Design: the "Cover maker: edit screen" artboard of the Cute Matcha design canvas.
 
@@ -24,6 +25,14 @@ npm run build      # outputs dist/
 - `src/components/`: the hub and what every page shares (header pills, windows)
 - `src/lib/`: language, theme and the sign-in check, shared by every tool
 - `src/tools/<slug>/`: one folder per tool, with its own `components/` and `lib/`
+
+Anime & Game Food, in `src/tools/anime-game-food/`:
+
+- `lib/dish.ts`: the sources (each an anime or a game), and `pickDish`, which never repeats the dish just shown
+- `lib/data/`: the tables, left out of SonarCloud's duplication check: `food-wars.ts`, `pokemon-sleep.ts` (the dishes, one file per source), `blurbs.ts` (a one-liner on each dish in English and French), `scenes.ts` (where a dish appears) and `ingredients.ts` (every ingredient's French name)
+- `components/food.tsx`: the page
+
+To add a show or game: an entry in `SOURCES`, a file of its dishes in `lib/data/` added to `DISHES` in `lib/dishes.ts`, its scenes in `SCENES`, a one-liner for each dish in `BLURBS`, and a French name for any new ingredient (the tests list what's missing).
 
 Character Maker, in `src/tools/character-maker/`:
 
