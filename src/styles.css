@@ -166,6 +166,11 @@ input:disabled {
   align-items: center;
   gap: 12px;
 }
+/* The hub's brand is a link itself: no underline, the text's own colour */
+a.brand {
+  color: var(--text);
+  text-decoration: none;
+}
 /* The logo goes back to every tool, the name to the tool's own home */
 .brand-logo {
   display: flex;
