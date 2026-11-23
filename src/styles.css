@@ -2235,8 +2235,10 @@ fieldset.segmented {
   outline: 3px solid var(--focus);
   outline-offset: -3px;
 }
-/* The round icon button: the phone menu's opener and its close button. */
-.tool-menu-button {
+/* The round icon buttons: the phone menu's opener and its close button,
+   and the house button back to every tool. */
+.tool-menu-button,
+.tool-home-button {
   display: inline-flex;
   flex: none;
   align-items: center;
